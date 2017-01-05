@@ -4,3 +4,5 @@
 */cache/*
 !*/cache/index.html
 !*/cache/.htaccess
+lib/CodeIgniter/application/config
+crontab
