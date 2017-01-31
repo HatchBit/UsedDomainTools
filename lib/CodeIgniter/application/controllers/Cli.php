@@ -15,7 +15,7 @@ class Cli extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        $this->load->helper(array('csv', 'directory', 'file'));
+        $this->load->helper(array('csv', 'directory', 'file', 'xml'));
         $this->load->model('Domain_model', 'domain', TRUE);
     }
     
@@ -216,7 +216,7 @@ class Cli extends CI_Controller {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
         
         // SEOMOZ
-        $apiurl = 'http://lsapi.seomoz.com/linkscape/url-metrics/##DOMAIN##?Cols=103079217184&AccessID=##ACCESSID##&Expires=##EXPIRES##&Signature=##SIGNATURE##';
+        //$apiurl = 'http://lsapi.seomoz.com/linkscape/url-metrics/##DOMAIN##?Cols=103079217184&AccessID=##ACCESSID##&Expires=##EXPIRES##&Signature=##SIGNATURE##';
         
         // Get your access id and secret key here: https://moz.com/products/api/keys
         $accessID = "mozscape-1bd70e3419";
@@ -224,21 +224,23 @@ class Cli extends CI_Controller {
         
         // Set your expires times for several minutes into the future.
         // An expires time excessively far in the future will not be honored by the Mozscape API.
-        $expires = time() + 300;
+        //$expires = time() + 300;
         
         // Put each parameter on a new line.
-        $stringToSign = $accessID."\n".$expires;
+        //$stringToSign = $accessID."\n".$expires;
         
         // Get the "raw" or binary output of the hmac hash.
-        $binarySignature = hash_hmac('sha1', $stringToSign, $secretKey, true);
+        //$binarySignature = hash_hmac('sha1', $stringToSign, $secretKey, true);
         
         // Base64-encode it and then url-encode that.
-        $urlSafeSignature = urlencode(base64_encode($binarySignature));
+        //$urlSafeSignature = urlencode(base64_encode($binarySignature));
         
         // build URL
-        $apiurl = str_replace('##ACCESSID##', $accessID, $apiurl);
-        $apiurl = str_replace('##EXPIRES##', $expires, $apiurl);
-        $apiurl = str_replace('##SIGNATURE##', $urlSafeSignature, $apiurl);
+        //$apiurl = str_replace('##ACCESSID##', $accessID, $apiurl);
+        //$apiurl = str_replace('##EXPIRES##', $expires, $apiurl);
+        //$apiurl = str_replace('##SIGNATURE##', $urlSafeSignature, $apiurl);
+        
+        echo date("Y-m-d H:i:s", time()).' '.__FILE__ . PHP_EOL;
         
         // APIサーバー
         if( $sv === NULL )
@@ -283,27 +285,33 @@ class Cli extends CI_Controller {
                 
                 foreach($objectURLs as $objecturl)
                 {
-                    $requestUrl = str_replace('##DOMAIN##', $objecturl, $apiurl);
+                    //$requestUrl = str_replace('##DOMAIN##', $objecturl, $apiurl);
                     // seomoz.
-                    $response = $this->domain->get_response_body($requestUrl);
+                    //$response = $this->domain->get_response_body($requestUrl);
+                    // XML を取得
+                    $response_xml = $this->domain->get_xml_object('xml', $cloud_urlmetrics_url, $objecturl, $accessID, $secretKey);
+                    
+                    // XML を配列に変換
+                    $response = xml2array(simplexml_load_string($response_xml));
                     
                     $updatedata = $whereparam = array();
                     if( ! empty($response) && ! isset($response['error_message']) )
                     {
+                        echo date("Y-m-d H:i:s", time()).' RESPONSE,'.json_encode($response).PHP_EOL;
                         $insertdata = array();
-                        if($response['uid'])
+                        if(isset($response['uid']))
                         {
                             $insertdata['totalLinks'] = $response["uid"];
                         }
-                        if($response['upa'])
+                        if(isset($response['upa']))
                         {
                             $insertdata['pageAuthority'] = $response["upa"];
                         }
-                        if($response['pda'])
+                        if(isset($response['pda']))
                         {
                             $insertdata['domainAuthority'] = $response["pda"];
                         }
-                        if($response['ueid'])
+                        if(isset($response['ueid']))
                         {
                             $insertdata['ueid'] = $response["ueid"];
                         }
@@ -350,7 +358,7 @@ class Cli extends CI_Controller {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
         
         // SEOMOZ
-        $apiurl = 'http://lsapi.seomoz.com/linkscape/url-metrics/##DOMAIN##?Cols=103079231493&AccessID=##ACCESSID##&Expires=##EXPIRES##&Signature=##SIGNATURE##';
+        //$apiurl = 'http://lsapi.seomoz.com/linkscape/url-metrics/##DOMAIN##?Cols=103079231493&AccessID=##ACCESSID##&Expires=##EXPIRES##&Signature=##SIGNATURE##';
         
         // Get your access id and secret key here: https://moz.com/products/api/keys
         $accessID = "mozscape-1bd70e3419";
@@ -358,21 +366,21 @@ class Cli extends CI_Controller {
         
         // Set your expires times for several minutes into the future.
         // An expires time excessively far in the future will not be honored by the Mozscape API.
-        $expires = time() + 300;
+        //$expires = time() + 300;
         
         // Put each parameter on a new line.
-        $stringToSign = $accessID."\n".$expires;
+        //$stringToSign = $accessID."\n".$expires;
         
         // Get the "raw" or binary output of the hmac hash.
-        $binarySignature = hash_hmac('sha1', $stringToSign, $secretKey, true);
+        //$binarySignature = hash_hmac('sha1', $stringToSign, $secretKey, true);
         
         // Base64-encode it and then url-encode that.
-        $urlSafeSignature = urlencode(base64_encode($binarySignature));
+        //$urlSafeSignature = urlencode(base64_encode($binarySignature));
         
         // build URL
-        $apiurl = str_replace('##ACCESSID##', $accessID, $apiurl);
-        $apiurl = str_replace('##EXPIRES##', $expires, $apiurl);
-        $apiurl = str_replace('##SIGNATURE##', $urlSafeSignature, $apiurl);
+        //$apiurl = str_replace('##ACCESSID##', $accessID, $apiurl);
+        //$apiurl = str_replace('##EXPIRES##', $expires, $apiurl);
+        //$apiurl = str_replace('##SIGNATURE##', $urlSafeSignature, $apiurl);
         
         echo date("Y-m-d H:i:s", time()).' '.__FILE__ . PHP_EOL;
         
@@ -439,19 +447,25 @@ class Cli extends CI_Controller {
                 $objecturl = $dl['domainname'];
                 
                 // DAPA からインテグレート
-                $requestUrl = str_replace('##DOMAIN##', $objecturl, $apiurl);
-                echo date("Y-m-d H:i:s", time()).' REQUEST URL : '.$requestUrl.PHP_EOL;
+                //$requestUrl = str_replace('##DOMAIN##', $objecturl, $apiurl);
+                //echo date("Y-m-d H:i:s", time()).' REQUEST URL : '.$requestUrl.PHP_EOL;
                 
                 // seomoz.
-                $response = $this->domain->get_response_body($requestUrl);
+                //$response = $this->domain->get_response_body($requestUrl);
+                // XML を取得
+                $response_xml = $this->domain->get_xml_object('ol_xml', $cloud_urlmetrics_url, $objecturl, $accessID, $secretKey);
+                
+                // XML を配列に変換
+                $response = xml2array(simplexml_load_string($response_xml));
                 
                 $updatedata = $whereparam = array();
                 if( ! empty($response) && ! isset($response['error_message']) )
                 {
                     foreach($response as $val)
                     {
+                        echo date("Y-m-d H:i:s", time()).' RESPONSE,'.json_encode($val).PHP_EOL;
                         $insertdata = array();
-                        if($val['ut'])
+                        if(isset($val['ut']))
                         {
                             $insertdata['pageTitle'] = $val['ut'];
                         }
@@ -459,19 +473,19 @@ class Cli extends CI_Controller {
                         {
                             $insertdata['pageTitle'] = 'NO TITLE.';
                         }
-                        if($val['uu'])
+                        if(isset($val['uu']))
                         {
                             $insertdata['pageURL'] = $val['uu'];
                         }
-                        if($val['upa'])
+                        if(isset($val['upa']))
                         {
                             $insertdata['pageAuthority'] = $val['upa'];
                         }
-                        if($val['pda'])
+                        if(isset($val['pda']))
                         {
                             $insertdata['domainAuthority'] = $val['pda'];
                         }
-                        if($val['umrp'])
+                        if(isset($val['umrp']))
                         {
                             $insertdata['mozRank'] = $val['umrp'];
                         }

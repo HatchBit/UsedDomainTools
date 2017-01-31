@@ -54,9 +54,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <div class="col-md-12">
                         <h2>自動スケジュール</h2>
                         <ol>
-                            <li>毎朝5時に pool.com から ZIPファイルをダウンロードします。（毎朝5時）</li>
-                            <li>ダウンロードされた ZIPファイルは、10,000行ごとに分割します。</li>
-                            <li>分割されたファイルを毎分1ファイルごとにデータベースに登録します。（毎分）</li>
+                            <li style="text-decoration: line-through;">毎朝5時に pool.com から ZIPファイルをダウンロードします。（毎朝5時）</li>
+                            <li style="text-decoration: line-through;">ダウンロードされた ZIPファイルは、10,000行ごとに分割します。</li>
+                            <li style="text-decoration: line-through;">分割されたファイルを毎分1ファイルごとにデータベースに登録します。（毎分）</li>
                             <li>登録されたドメインの HTTPステータスをチェックします。（毎分）</li>
                             <li>HTTPステータス「100以上600未満」のドメインに対し、SEOmoz Site Metrics をチェックします。（7分おき）</li>
                             <li>「Domain Authority 18以上、ueid 5以上」のドメインに対し、SEOmoz link Metrics をチェックします。（7分おき）</li>

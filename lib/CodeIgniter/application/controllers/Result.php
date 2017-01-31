@@ -140,6 +140,106 @@ class Result extends CI_Controller {
         $this->load->view('result', $this->data);
     }
     
+    public function searchlist($n=NULL)
+    {
+        switch($n)
+        {
+            // 被リンクチェック数
+            case 5:
+                $params = array(
+                    'whereparam' => array(
+                        'kind' => 'where',
+                        'colname' => 'domains.status',
+                        'value' => 0 
+                    )
+                );
+                break;
+            // SEOmoz Link Metrics チェック数
+            case 4:
+                $params = array(
+                    'whereparam' => array(
+                        array(
+                            'kind' => 'or_where',
+                            'colname' => 'domains.http_code',
+                            'value' => -9
+                        ),
+                        array(
+                            'kind' => 'or_where',
+                            'colname' => 'domains.http_code >',
+                            'value' => 1000
+                        )
+                    )
+                );
+                break;
+            // SEOmoz Site Metrics チェック数
+            case 3:
+                $params = array(
+                    'whereparam' => array(
+                        array(
+                            'kind' => 'where',
+                            'colname' => 'domainCheckSites.totalLinks >',
+                            'value' => 0 
+                        ),
+                        array(
+                            'kind' => 'where',
+                            'colname' => 'domains.status <>',
+                            'value' => 0 
+                        )
+                    )
+                );
+                break;
+            // HTTPステータスチェック数
+            case 2:
+                $params = array(
+                    'whereparam' => array(
+                        array(
+                            'kind' => 'where',
+                            'colname' => 'domains.mozcheck',
+                            'value' => 1 
+                        ),
+                        array(
+                            'kind' => 'where',
+                            'colname' => 'domains.status <>',
+                            'value' => 0 
+                        )
+                    )
+                );
+                break;
+            // 処理待ちのドメイン数
+            case 1:
+                $params = array(
+                    'whereparam' => array(
+                        array(
+                            'kind' => 'where',
+                            'colname' => 'domains.status <>',
+                            'value' => 0 
+                        )
+                    )
+                );
+                break;
+            // 登録されているドメイン数
+            case 0:
+            default:
+                $params = array(
+                    'whereparam' => array(
+                        array(
+                            'kind' => 'where',
+                            'colname' => 'domains.status',
+                            'value' => 0 
+                        )
+                    )
+                );
+                break;
+        }
+        
+        // 検索クエリー
+        $results = $this->domain->get_results($params['whereparam']);
+        
+        $this->data['searchResults'] = $results;
+        
+        $this->load->view('result', $this->data);
+    }
+    
     public function search()
     {
         // COOKIEから検索パラメータ生成
@@ -377,10 +477,8 @@ class Result extends CI_Controller {
         $this->data['countHttpChecked'] = $this->domain->get_count_domains($whereparam, 'domains');
         
         $whereparam = array();
-        $whereparam[] = array('kind'=>'where', 'colname'=>'mozCheck', 'value'=> 1);
+        $whereparam[] = array('kind'=>'where', 'colname'=>'mozcheck', 'value'=> 1);
         $this->data['countSiteMetChecked'] = $this->domain->get_count_domains($whereparam, 'domains');
-        
-        $this->data['countAllLinkMetChecked'] = $this->domain->get_count_domains(NULL, 'domainCheckSites');
         
         $whereparam = array();
         $whereparam[] = array('kind'=>'where', 'colname'=>'totalLinks >', 'value'=> 0);

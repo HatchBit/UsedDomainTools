@@ -26,6 +26,13 @@ class Domain_model extends CI_Model {
         return $downloadfile;
     }
     
+    /**
+     * CSVファイルを登録
+     * 
+     * @param       string  $filepath CSVファイルのパス
+     * @param       string  $encode CSVファイルの文字エンコード
+     * @return      array 登録したデータの配列
+     */
     public function insert_domain_from_csv($filepath="", $encode="SJIS-WIN")
     {
         $results = array();
@@ -41,7 +48,54 @@ class Domain_model extends CI_Model {
             //$query = $this->db->get('domains');
             //$test = $query->row();
             
-            $sql = "SELECT COUNT(id) AS counts FROM domains WHERE domainname = ".$this->db->escape($line[0]);
+            // 列の数
+            // pool.com                     => [domain],[date(%n/%j/%Y)],"AUC"
+            // nameJet.com(PreRelease-all)  => [domain],[date(%Y-%m-%d)],"$"[price]
+            // nameJet.com(PreRelease-day)  => [date(%Y-%m-%d)],"$"[price],[domain]
+            // nameJet.com(PendingDelete)   => [domain]
+            // nameJet.com(Auction)         => [domain],[datetime(%Y-%m-%d %H:%i:%s)]
+            
+            switch (count($line))
+            {
+                case 1:
+                    // nameJet.com(PendingDelete)   => [domain]
+                    $domain = $line[0];
+                    $date = time();
+                    break;
+                case 2:
+                    // nameJet.com(Auction)         => [domain],[datetime(%Y-%m-%d %H:%i:%s)]
+                    $domain = $line[0];
+                    $date = strtotime($line[1]);
+                    break;
+                case 3:
+                    if ($line[2] === "AUC")
+                    {
+                        // pool.com                     => [domain],[date(%n/%j/%Y)],"AUC"
+                        $domain = $line[0];
+                        $datearr = explode(" ", $line[1]);
+                        $datestr = $datearr[0] . " " . $datearr[1];
+                        $date = strtotime($datestr);
+                    }
+                    
+                    if (strpos($line[2], "$") !== FALSE)
+                    {
+                        // nameJet.com(PreRelease-all)  => [domain],[date(%Y-%m-%d)],"$"[price]
+                        $domain = $line[0];
+                        $date = strtotime($line[1]);
+                    }
+                    
+                    if (strpos($line[1], "$") !== FALSE)
+                    {
+                        // nameJet.com(PreRelease-day)  => [date(%Y-%m-%d)],"$"[price],[domain]
+                        $domain = $line[2];
+                        $date = strtotime($line[0]);
+                    }
+                    break;
+                default:
+                    continue;
+                    break;
+            }
+            $sql = "SELECT COUNT(id) AS counts FROM domains WHERE domainname = ".$this->db->escape($domain);
             $query = $this->db->query($sql);
             $test = $query->row();
             
@@ -54,7 +108,7 @@ class Domain_model extends CI_Model {
                 // 文字コードを変換
                 mb_convert_variables($encto, $encode, $line);
                 
-                $domainname = $line[0];
+                $domainname = $domain;
                 
                 //A列がcom/net/org/info/biz 以外を除き、全てDBへ入れる
                 $enableTLDs = array("com","net","org","info","biz","jp");
@@ -66,9 +120,10 @@ class Domain_model extends CI_Model {
                 }
                 
                 //・B列が当日以前の物は削除
-                $nowDateStr = time();
-                $thisTime = strtotime(substr($line[1], 0, 19));
-                if($thisTime < time())
+                $nowDateStr = mktime(0,0,0,date("n"),date("j"),date("Y"));
+                //$thisTime = strtotime(substr($line[1], 0, 19));
+                $thisTime = $date;
+                if($thisTime < $nowDateStr)
                 {
                     continue;
                 }
@@ -443,9 +498,62 @@ class Domain_model extends CI_Model {
         return $results;
     }
     
+    public function get_xml_object($kind=NULL, $server=NULL, $url=NULL, $accessid=NULL, $secretkey=NULL)
+    {
+        // http://66.221.175.168/ol/get_xml.php?url=www.hatchbit.jp&password=YwwZlCRX
+        if($server === NULL)
+        {
+            return FALSE;
+        }
+        
+        $requesturi = "http://".$server."/ol/";
+        switch($kind)
+        {
+            case "ol_xml":
+                $requesturi .= "get_ol_xml.php";
+                break;
+            case "xml":
+            default:
+                $requesturi .= "get_xml.php";
+                break;
+        }
+        
+        if($url === NULL)
+        {
+            return FALSE;
+        }
+        $requesturi .= "?url=".$url;
+        
+        $requesturi .= "&accessid=".$accessid;
+        $requesturi .= "&secretkey=".$secretkey;
+        $requesturi .= "&password=YwwZlCRX";
+        
+        // cURL options
+        $options = array(
+            CURLOPT_URL            => $requesturi,// 取得する URL 。 curl_init() でセッションを 初期化する際に指定することも可能です。
+            CURLOPT_HEADER         => FALSE,// TRUE を設定すると、ヘッダの内容も出力します。
+            CURLOPT_NOBODY         => FALSE,// TRUE を設定すると、出力から本文を削除します。 リクエストメソッドは HEAD となります。これを FALSE に変更してもリクエストメソッドは GET には変わりません。
+            CURLOPT_RETURNTRANSFER => TRUE,// TRUE を設定すると、 curl_exec() の返り値を 文字列で返します。通常はデータを直接出力します。
+            CURLOPT_FRESH_CONNECT  => TRUE,// TRUE を設定すると、キャッシュされている接続を利用せずに 新しい接続を確立します。
+            //CURLOPT_USERAGENT      => $agent,// HTTP リクエストで使用される "User-Agent: " ヘッダの内容。
+            //CURLOPT_COOKIEFILE     => $cookiefile
+        );
+        
+        // new cURL resource
+        $ch = curl_init($requesturi);
+        curl_setopt_array($ch, $options);
+        
+        // execute.
+        $response = curl_exec($ch);
+        // close.
+        curl_close($ch);
+        
+        return $response;
+    }
+    
     public function delete_domains($wherestring=NULL)
     {
-        $sql = "DELETE FROM `domains`,`domainLinks`,`domainCheckSites`
+        $sql = "DELETE `domains`,`domainLinks`,`domainCheckSites`
         FROM `domains`
         LEFT JOIN `domainCheckSites` ON `domainCheckSites`.`domain_id` = `domains`.`id`
         LEFT JOIN `domainLinks` ON `domainLinks`.`domain_id` = `domains`.`id`";
@@ -471,9 +579,9 @@ class Domain_model extends CI_Model {
     public function truncate_domains()
     {
         $this->db->trans_start();
-        $this->db->query('TRUNCATE `domainLinks`');
-        $this->db->query('TRUNCATE `domainCheckSites`');
-        $this->db->query('TRUNCATE `domains`');
+        $this->db->query('TRUNCATE TABLE `domainLinks`');
+        $this->db->query('TRUNCATE TABLE `domainCheckSites`');
+        $this->db->query('TRUNCATE TABLE `domains`');
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {

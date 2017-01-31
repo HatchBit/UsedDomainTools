@@ -68,27 +68,51 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <tbody>
                                 <tr>
                                     <th>登録されているドメイン数</th>
-                                    <td class="text-right"><?php echo number_format($countAllDomains); ?></td>
+                                    <td class="text-right"><?php if($countAllDomains > 0): ?>
+                                    <a href="/useddomaintools/result/searchlist/0"><?php echo number_format($countAllDomains); ?></a>
+                                    <?php else: ?>
+                                    <?php echo number_format($countAllDomains); ?>
+                                    <?php endif; ?></td>
                                 </tr>
                                 <tr>
                                     <th>処理待ちのドメイン数</th>
-                                    <td class="text-right"><?php echo number_format($countPendings); ?></td>
+                                    <td class="text-right"><?php if($countPendings > 0): ?>
+                                    <a href="/useddomaintools/result/searchlist/1"><?php echo number_format($countPendings); ?></a>
+                                    <?php else: ?>
+                                    <?php echo number_format($countPendings); ?>
+                                    <?php endif; ?></td>
                                 </tr>
                                 <tr>
                                     <th>HTTPステータスチェック数</th>
-                                    <td class="text-right"><?php echo number_format($countHttpChecked); ?></td>
+                                    <td class="text-right"><?php if($countHttpChecked > 0): ?>
+                                    <a href="/useddomaintools/result/searchlist/2"><?php echo number_format($countHttpChecked); ?></a>
+                                    <?php else: ?>
+                                    <?php echo number_format($countHttpChecked); ?>
+                                    <?php endif; ?></td>
                                 </tr>
                                 <tr>
                                     <th>SEOmoz Site Metrics チェック数</th>
-                                    <td class="text-right"><?php echo number_format($countSiteMetChecked); ?></td>
+                                    <td class="text-right"><?php if($countSiteMetChecked > 0): ?>
+                                    <a href="/useddomaintools/result/searchlist/3"><?php echo number_format($countSiteMetChecked); ?></a>
+                                    <?php else: ?>
+                                    <?php echo number_format($countSiteMetChecked); ?>
+                                    <?php endif; ?></td>
                                 </tr>
                                 <tr>
                                     <th>SEOmoz Link Metrics チェック数</th>
-                                    <td class="text-right"><?php echo number_format($countLinkMetChecked); ?></td>
+                                    <td class="text-right"><?php if($countLinkMetChecked > 0): ?>
+                                    <a href="/useddomaintools/result/searchlist/4"><?php echo number_format($countLinkMetChecked); ?></a>
+                                    <?php else: ?>
+                                    <?php echo number_format($countLinkMetChecked); ?>
+                                    <?php endif; ?></td>
                                 </tr>
                                 <tr class="hidden">
                                     <th>被リンクチェック数</th>
-                                    <td class="text-right"><?php echo number_format($countLinkChecked); ?></td>
+                                    <td class="text-right"><?php if($countLinkChecked > 0): ?>
+                                    <a href="/useddomaintools/result/searchlist/5"><?php echo number_format($countLinkChecked); ?></a>
+                                    <?php else: ?>
+                                    <?php echo number_format($countLinkChecked); ?>
+                                    <?php endif; ?></td>
                                 </tr>
                             </tbody>
                         </table>

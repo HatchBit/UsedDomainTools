@@ -6,3 +6,4 @@
 !*/cache/.htaccess
 lib/CodeIgniter/application/config
 crontab
+lib/CodeIgniter/application/cache
