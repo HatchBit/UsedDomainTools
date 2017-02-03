@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="d23cb93a-d95f-4a12-a2a0-f564197a0193" name="UsedDomainTools" url="http://54.204.4.15/useddomaintools">
+        <fileTransfer host="54.204.4.15" port="21" rootFolder="/var/www/html/webadmin/useddomaintools">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
