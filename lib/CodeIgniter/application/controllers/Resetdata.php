@@ -70,11 +70,11 @@ class Resetdata extends CI_Controller {
             $startDateTime = date("Y-m-d H:i:s", $startTime);
             $endDateTime = date("Y-m-d H:i:s", $endTime);
             
-            $wherestring = "`domains`.`insertdatetime` BETWEEN '".$startDateTime."' AND '".$endDateTime."'";
+            $wherestring = "`domains`.`insertdatetime` < '".$endDateTime."'";
             
             if ($this->domain->delete_domains($wherestring))
             {
-                $this->data['msg'][] = array('class'=>'success', 'text'=>'指定された日付のドメインを削除しました。');
+                $this->data['msg'][] = array('class'=>'success', 'text'=>'指定された日付以前のドメインを削除しました。');
             }
             else
             {

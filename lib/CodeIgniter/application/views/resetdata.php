@@ -65,8 +65,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <?php echo form_close(); ?>
                 </div>
                 <div class="row">
-                    <h2>指定した日付のデータを削除</h2>
-                    <p>指定された日付に追加されたドメインのみを削除します。</p>
+                    <h2>指定した日付以前のデータを削除</h2>
+                    <p>指定された日付以前に追加されたドメインのみを削除します。</p>
                     <?php echo form_open('resetdata/deletedate', array('class'=>'form', 'role'=>'form'), array('mode'=>'deletedate')); ?>
                     <div class="form-group">
                         <div class="col-xs-3">

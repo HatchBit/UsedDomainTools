@@ -39,10 +39,14 @@ class Insertdomain extends CI_Controller {
         $this->load->view('insertdomain', $this->data);
     }
     
+    /**
+     * CSVファイルアップロード
+     */
     public function csv()
     {
         $config['upload_path']      = $this->downloaddir;
-        $config['allowed_types']    = 'csv|txt|text';
+        //$config['allowed_types']    = 'csv|txt|text';
+        $config['allowed_types']    = '*';
         $config['overwrite']        = TRUE;
         $config['remove_spaces']    = TRUE;
         
