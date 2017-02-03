@@ -1,9 +1,19 @@
 <?php
+/**
+ * Copyright (c) 2017. HatchBit & Co.
+ *
+ * @property    Domain_model
+ *
+ */
+
 if(is_cli() === FALSE)
 {
     exit();
 }
 
+/**
+ * Class Cli
+ */
 class Cli extends CI_Controller {
     
     public $downloaddir = FILEPATH;
@@ -74,6 +84,7 @@ class Cli extends CI_Controller {
         
         // ZIP ファイルを解凍
         $zip = new ZipArchive;
+        $distFileName = (string) '';
         if($zip->open($zipfilepath) === TRUE){
             $zip->extractTo($this->downloaddir);// ディレクトリに展開
             if(file_exists($csvfilepath)){
@@ -139,7 +150,7 @@ class Cli extends CI_Controller {
             if(strpos($val, $this->prefix_splitfile) === 0)
             {
                 echo date("Y-m-d H:i:s", time()).' FILENAME = '.$val.PHP_EOL;
-                $results = $this->domain->insert_domain_from_csv($this->downloaddir . DIRECTORY_SEPARATOR . $val, "SJIS-WIN");
+                $this->domain->insert_domain_from_csv($this->downloaddir . DIRECTORY_SEPARATOR . $val, "SJIS-WIN");
                 unlink($this->downloaddir . DIRECTORY_SEPARATOR . $val);
                 break;
             }
@@ -207,11 +218,13 @@ class Cli extends CI_Controller {
  *
  * DA・PA・被リンク数を取得し、DBへ格納
  * Status = -1 を対象に
- * @param $sv APIサーバーID
- * @param $num 処理件数
+ *
+ * @param   integer   $sv     APIサーバーID
+ * @param   integer   $num    処理件数
+ *
  * @response success -> domains.status = -3, failure -> domains.status = -4
  */
-    public function getxml($sv=NULL, $num=10)
+    public function getxml($sv=NULL, $num=10, $debug=FALSE)
     {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
         
@@ -255,6 +268,8 @@ class Cli extends CI_Controller {
         
         $apiservers = $this->domain->get_apiserver($svnum);
         echo date("Y-m-d H:i:s", time()).' apiserver='.print_r($apiservers, true).PHP_EOL;
+
+        $cloud_urlmetrics_url = $filename = '';
         if($apiservers['name'])
         {
             $cloud_urlmetrics_url = $apiservers['name'];
@@ -285,6 +300,7 @@ class Cli extends CI_Controller {
                 
                 foreach($objectURLs as $objecturl)
                 {
+                    $thissec = time();
                     //$requestUrl = str_replace('##DOMAIN##', $objecturl, $apiurl);
                     // seomoz.
                     //$response = $this->domain->get_response_body($requestUrl);
@@ -293,7 +309,13 @@ class Cli extends CI_Controller {
                     
                     // XML を配列に変換
                     $response = xml2array(simplexml_load_string($response_xml));
-                    
+
+                    if($debug !== FALSE)
+                    {
+                        echo date("Y-m-d H:i:s", time()).' response = '.print_r($response, true).PHP_EOL;
+                        goto skipexecute;
+                    }
+
                     $updatedata = $whereparam = array();
                     if( ! empty($response) && ! isset($response['error_message']) )
                     {
@@ -331,9 +353,20 @@ class Cli extends CI_Controller {
                     }
                     $whereparam[] = array('kind' => 'where', 'colname' => 'id', 'value' => $dl['id']);
                     $this->domain->update_domains($whereparam, $updatedata);
-                    
+
+                    skipexecute:
+
+                    $responsesec = time() - $thissec;
                     // delay 14 sec.
-                    sleep(14);
+                    if($responsesec < 14)
+                    {
+                        $delaysec = 14 - $responsesec;
+                    }
+                    else
+                    {
+                        $delaysec = 1;
+                    }
+                    sleep($delaysec);
                 }
                 unset($objecturl);
             }
@@ -353,7 +386,7 @@ class Cli extends CI_Controller {
  * DA18以上・被リンク数5本以上のドメインに対し、被リンクURLを全て取得し、DBへ保存
  *
  */
-    public function getolxml($sv=NULL, $num=10)
+    public function getolxml($sv=NULL, $num=10, $debug=FALSE)
     {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
         
@@ -397,10 +430,12 @@ class Cli extends CI_Controller {
         
         $apiservers = $this->domain->get_apiserver($svnum);
         echo date("Y-m-d H:i:s", time()).' apiserver='.print_r($apiservers, true).PHP_EOL;
+        $cloud_urlmetrics_url = '';
         if($apiservers['name'])
         {
             $cloud_urlmetrics_url = $apiservers['name'];
         }
+        $filename = 0;
         if($apiservers['id'])
         {
             $filename = $apiservers['id'];
@@ -409,7 +444,7 @@ class Cli extends CI_Controller {
         // 処理
         // 対象ドメインを選定
         $qstatus = 30000 + $filename;
-        $updatedata = $whereparam = array();
+        $whereparam = array();
         $whereparam[] = array('kind' => 'where', 'colname' => 'domainAuthority >=', 'value' => 18);
         $whereparam[] = array('kind' => 'where', 'colname' => 'ueid >=', 'value' => 5);
         $whereparam[] = array('kind' => 'where', 'colname' => 'linksMet', 'value' => -9);
@@ -445,7 +480,7 @@ class Cli extends CI_Controller {
             foreach($domainlist as $dl)
             {
                 $objecturl = $dl['domainname'];
-                
+                $thissec = time();
                 // DAPA からインテグレート
                 //$requestUrl = str_replace('##DOMAIN##', $objecturl, $apiurl);
                 //echo date("Y-m-d H:i:s", time()).' REQUEST URL : '.$requestUrl.PHP_EOL;
@@ -457,8 +492,13 @@ class Cli extends CI_Controller {
                 
                 // XML を配列に変換
                 $response = xml2array(simplexml_load_string($response_xml));
-                
-                $updatedata = $whereparam = array();
+
+                if($debug !== FALSE)
+                {
+                    echo date("Y-m-d H:i:s", time()).' response = '.print_r($response, true).PHP_EOL;
+                    goto skipexecute;
+                }
+
                 if( ! empty($response) && ! isset($response['error_message']) )
                 {
                     foreach($response as $val)
@@ -503,6 +543,20 @@ class Cli extends CI_Controller {
                     $whereparam[] = array('kind' => 'where', 'colname' => 'domain_id', 'value' => $dl['id']);
                     $this->domain->update_domains($whereparam, $updatedata, "domainCheckSites");
                 }
+
+                skipexecute:
+
+                $responsesec = time() - $thissec;
+                // delay 14 sec.
+                if($responsesec < 14)
+                {
+                    $delaysec = 14 - $responsesec;
+                }
+                else
+                {
+                    $delaysec = 1;
+                }
+                sleep($delaysec);
             }
             unset($dl);
         }
