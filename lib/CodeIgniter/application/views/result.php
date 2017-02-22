@@ -69,7 +69,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <tr>
                                     <th>登録されているドメイン数</th>
                                     <td class="text-right"><?php if($countAllDomains > 0): ?>
-                                    <a href="/useddomaintools/result/searchlist/0"><?php echo number_format($countAllDomains); ?></a>
+                                    <?php echo number_format($countAllDomains); ?>
                                     <?php else: ?>
                                     <?php echo number_format($countAllDomains); ?>
                                     <?php endif; ?></td>
@@ -77,7 +77,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <tr>
                                     <th>処理待ちのドメイン数</th>
                                     <td class="text-right"><?php if($countPendings > 0): ?>
-                                    <a href="/useddomaintools/result/searchlist/1"><?php echo number_format($countPendings); ?></a>
+                                    <?php echo number_format($countPendings); ?>
                                     <?php else: ?>
                                     <?php echo number_format($countPendings); ?>
                                     <?php endif; ?></td>
@@ -85,7 +85,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <tr>
                                     <th>HTTPステータスチェック数</th>
                                     <td class="text-right"><?php if($countHttpChecked > 0): ?>
-                                    <a href="/useddomaintools/result/searchlist/2"><?php echo number_format($countHttpChecked); ?></a>
+                                    <?php echo number_format($countHttpChecked); ?>
                                     <?php else: ?>
                                     <?php echo number_format($countHttpChecked); ?>
                                     <?php endif; ?></td>
@@ -93,7 +93,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <tr>
                                     <th>SEOmoz Site Metrics チェック数</th>
                                     <td class="text-right"><?php if($countSiteMetChecked > 0): ?>
-                                    <a href="/useddomaintools/result/searchlist/3"><?php echo number_format($countSiteMetChecked); ?></a>
+                                    <?php echo number_format($countSiteMetChecked); ?>
                                     <?php else: ?>
                                     <?php echo number_format($countSiteMetChecked); ?>
                                     <?php endif; ?></td>
@@ -101,7 +101,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <tr>
                                     <th>SEOmoz Link Metrics チェック数</th>
                                     <td class="text-right"><?php if($countLinkMetChecked > 0): ?>
-                                    <a href="/useddomaintools/result/searchlist/4"><?php echo number_format($countLinkMetChecked); ?></a>
+                                    <?php echo number_format($countLinkMetChecked); ?>
                                     <?php else: ?>
                                     <?php echo number_format($countLinkMetChecked); ?>
                                     <?php endif; ?></td>
@@ -109,7 +109,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <tr class="hidden">
                                     <th>被リンクチェック数</th>
                                     <td class="text-right"><?php if($countLinkChecked > 0): ?>
-                                    <a href="/useddomaintools/result/searchlist/5"><?php echo number_format($countLinkChecked); ?></a>
+                                    <?php echo number_format($countLinkChecked); ?>
                                     <?php else: ?>
                                     <?php echo number_format($countLinkChecked); ?>
                                     <?php endif; ?></td>
@@ -283,19 +283,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <thead>
                             <tr>
                                 <th>ID.</th>
-                                <th>ﾄﾞﾒｲﾝ</th>
+                                <th>ﾄﾞﾒｲﾝ / URL</th>
                                 <th>追加日</th>
-                                <th>URL</th>
                                 <th>HTTP</th>
                                 <th>Page Authority</th>
                                 <th>Domain Authority</th>
                                 <th>Total Links</th>
                                 <th>Link Root Domain</th>
                                 <th>SEOmoz Link Met.</th>
-                                <th colspan="6">サムネイル 2015/2009/2002</th>
+                                <th colspan="6">サムネイル 2017 / 2009 / 2002</th>
                             </tr>
                             <tr>
-                                <td colspan="11">
+                                <td colspan="10">
                                     <b>検索結果数:<?php echo count($searchResults); ?></b>
                                     <?php if(count($searchResults) > 0): ?>
                                     <a href="useddomaintools/result/download">
@@ -309,41 +308,45 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <tbody>
                             <?php if(count($searchResults) == 0): ?>
                             <tr>
-                                <td colspan="12"><p>上のフォームから絞り込み条件を見直してみて下さい。</p></td>
+                                <td colspan="10"><p>上のフォームから絞り込み条件を見直してみて下さい。</p></td>
                             </tr>
                             <?php else: ?>
                             <?php foreach($searchResults as $sr): ?>
                             <tr>
                                 <td><?php echo $sr['domain_id']; ?></td>
-                                <td><?php echo $sr['domainname']; ?></td>
+                                <td>
+                                    <?php echo $sr['domainname']; ?><br>
+                                    <?php echo $sr['url']; ?>
+                                </td>
                                 <td><?php echo $sr['insertdatetime']; ?></td>
-                                <td><?php echo $sr['url']; ?></td>
-                                <td><?php if($sr['cs_http_code'] == 999): ?>0
-                                <?php elseif($sr['cs_http_code'] == 0): ?>&nbsp;
-                                <?php else: echo $sr['cs_http_code']; ?>
-                                <?php endif; ?></td>
-                                <td><?php echo $sr['pageAuthority']; ?></td>
-                                <td><?php echo $sr['domainAuthority']; ?></td>
-                                <td><?php echo $sr['totalLinks']; ?></td>
-                                <td><?php echo $sr['linkRootDomain']; ?></td>
-                                <td><?php echo $sr['LostlinksMet']; ?> - <?php echo $sr['linksMet']; ?></td>
+                                <td class="text-right">
+                                    <?php if($sr['cs_http_code'] == 999): ?>0
+                                    <?php elseif($sr['cs_http_code'] == 0): ?>&nbsp;
+                                    <?php else: echo $sr['cs_http_code']; ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-right"><?php echo $sr['pageAuthority']; ?></td>
+                                <td class="text-right"><?php echo $sr['domainAuthority']; ?></td>
+                                <td class="text-right"><?php echo $sr['totalLinks']; ?></td>
+                                <td class="text-right"><?php echo $sr['linkRootDomain']; ?></td>
+                                <td class="text-right"><?php echo $sr['LostlinksMet']; ?> - <?php echo $sr['linksMet']; ?></td>
                                 <td>
                                     <?php if($sr['url']): ?>
                                     <table class="table table-condensed">
                                         <tr>
                                             <td>
                                                 <a href="http://web.archive.org/web/20170000000000/http://<?php echo $sr['url']; ?>">
-                                                    <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20170000000000/http://<?php echo $sr['url']; ?>" alt="" />
+                                                    <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20170000000000/http://<?php echo $sr['url']; ?>" alt="" width="200" height="150" />
                                                 </a>
                                             </td>
                                             <td>
                                                 <a href="http://web.archive.org/web/20090000000000/http://<?php echo $sr['url']; ?>">
-                                                    <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20170000000000/http://<?php echo $sr['url']; ?>" alt="" />
+                                                    <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20090000000000/http://<?php echo $sr['url']; ?>" alt="" width="200" height="150" />
                                                 </a>
                                             </td>
                                             <td>
                                                 <a href="http://web.archive.org/web/20020000000000/http://<?php echo $sr['url']; ?>">
-                                                    <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20170000000000/http://<?php echo $sr['url']; ?>" alt="" />
+                                                    <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20020000000000/http://<?php echo $sr['url']; ?>" alt="" width="200" height="150" />
                                                 </a>
                                             </td>
                                         </tr>

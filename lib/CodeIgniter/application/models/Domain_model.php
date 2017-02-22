@@ -215,7 +215,70 @@ class Domain_model extends CI_Model {
         }
         return $results;
     }
-    
+
+    public function get_checksites($whereparam=NULL, $limit=NULL, $offset=0)
+    {
+        $results = array();
+        if( $whereparam !== NULL )
+        {
+            foreach($whereparam as $val)
+            {
+                $colname = $val['colname'];
+                $colvalue = $val['value'];
+
+                switch($val['kind'])
+                {
+                    case 'or_like':
+                        $this->db->or_like($colname, $colvalue, 'both');
+                        break;
+
+                    case 'like':
+                        $this->db->like($colname, $colvalue, 'both');
+                        break;
+
+                    case 'or_where_not_in':
+                        $this->db->or_where_not_in($colname, $colvalue);
+                        break;
+
+                    case 'where_not_in':
+                        $this->db->where_not_in($colname, $colvalue);
+                        break;
+
+                    case 'or_where_in':
+                        $this->db->or_where_in($colname, $colvalue);
+                        break;
+
+                    case 'where_in':
+                        $this->db->where_in($colname, $colvalue);
+                        break;
+
+                    case 'or_where':
+                        $this->db->or_where($colname, $colvalue);
+                        break;
+
+                    case 'where':
+                    default:
+                        $this->db->where($colname, $colvalue);
+                        break;
+                }
+            }
+            unset($val);
+        }
+        if( ! empty($limit))
+        {
+            $this->db->limit($limit, $offset);
+        }
+        $this->db->from('domainCheckSites');
+        //$this->db->join('domains', 'domains.id = domainCheckSites.domain_id');
+        //$this->db->select('domain_id, domainname, colname, coltype, colvalue, colnum, status');
+        $query = $this->db->get();
+        foreach ($query->result_array() as $row)
+        {
+            $results[] = $row;
+        }
+        return $results;
+    }
+
     public function get_results($whereparam=NULL, $limit=NULL, $offset=0, $sort=NULL)
     {
         $results = array();
@@ -311,54 +374,23 @@ class Domain_model extends CI_Model {
         }
         return $results;
     }
-    
-    public function get_checksites($whereparam=NULL, $limit=NULL, $offset=0)
-    {
-        $results = array();
-        if( $whereparam !== NULL )
-        {
-            foreach($whereparam as $val)
-            {
-                $colname = $val['colname'];
-                $colvalue = $val['value'];
-                
-                switch($val['kind'])
-                {
-                    case 'or_where':
-                        $this->db->or_where($colname, $colvalue);
-                    break;
-                    
-                    case 'where_in':
-                        $this->db->where_in($colname, $colvalue);
-                    break;
-                    
-                    case 'where':
-                    default:
-                        $this->db->where($colname, $colvalue);
-                    break;
-                }
-            }
-            unset($val);
-        }
-        if( ! empty($limit))
-        {
-            $this->db->limit($limit, $offset);
-        }
-        $this->db->from('domainCheckSites');
-        //$this->db->join('domains', 'domains.id = domainCheckSites.domain_id');
-        //$this->db->select('domain_id, domainname, colname, coltype, colvalue, colnum, status');
-        $query = $this->db->get();
-        foreach ($query->result_array() as $row)
-        {
-            $results[] = $row;
-        }
-        return $results;
-    }
-    
+
     public function get_count_domains($whereparam=NULL, $tablename='domains')
     {
         $counts = 0;
-        $this->db->select('count(id) as counts');
+        if($tablename == 'domainCheckSites')
+        {
+            $this->db->select('COUNT(DISTINCT domain_id) as counts');
+        }
+        elseif($tablename == 'domainCheckSites')
+        {
+            $this->db->select('COUNT(DISTINCT domain_id) as counts');
+        }
+        else
+        {
+            $this->db->select('count(id) as counts');
+        }
+
         if( $whereparam !== NULL )
         {
             foreach($whereparam as $val)
@@ -391,28 +423,29 @@ class Domain_model extends CI_Model {
         return $counts;
     }
     
-    public function update_domains($whereparam=NULL, $updatedata=NULL, $tablename="domains")
+    public function update_domains($whereparam=NULL, $updatedata=NULL, $tablename="domains", $limit=NULL)
     {
-        if( $whereparam !== NULL )
-        {
-            foreach($whereparam as $val)
-            {
+        if ($whereparam !== NULL) {
+            foreach ($whereparam as $val) {
                 $colname = $val['colname'];
                 $colvalue = $val['value'];
-                
-                switch($val['kind'])
-                {
+
+                switch ($val['kind']) {
                     case 'where_in':
                         $this->db->where_in($colname, $colvalue);
-                    break;
-                    
+                        break;
+
                     case 'where':
                     default:
                         $this->db->where($colname, $colvalue);
-                    break;
+                        break;
                 }
             }
             unset($val);
+        }
+        if ($limit !== NULL)
+        {
+            $this->db->limit($limit);
         }
         $this->db->update($tablename, $updatedata);
     }
@@ -454,6 +487,7 @@ class Domain_model extends CI_Model {
     
     public function get_apiserver($svnum=NULL)
     {
+        $result = array();
         if( ! $svnum)
         {
             $svnum = rand(1,100);
@@ -466,6 +500,8 @@ class Domain_model extends CI_Model {
         {
             $result['id'] = $row['id'];
             $result['name'] = $row['name'];
+            $result['access_id'] = $row['access_id'];
+            $result['secret_key'] = $row['secret_key'];
         }
         return $result;
     }
@@ -498,7 +534,7 @@ class Domain_model extends CI_Model {
         return $results;
     }
     
-    public function get_xml_object($kind=NULL, $server=NULL, $url=NULL, $accessid=NULL, $secretkey=NULL)
+    public function get_xml_object($kind=NULL, $server=NULL, $url=NULL, $accessid=NULL, $secretkey=NULL, $password=NULL)
     {
         // http://66.221.175.168/ol/get_xml.php?url=www.hatchbit.jp&password=YwwZlCRX
         if($server === NULL)
@@ -507,6 +543,7 @@ class Domain_model extends CI_Model {
         }
         
         $requesturi = "http://".$server."/ol/";
+        //$requesturi = "http://54.204.4.15/useddomaintools/ol/";
         switch($kind)
         {
             case "ol_xml":
@@ -523,11 +560,21 @@ class Domain_model extends CI_Model {
             return FALSE;
         }
         $requesturi .= "?url=".$url;
-        
-        $requesturi .= "&accessid=".$accessid;
-        $requesturi .= "&secretkey=".$secretkey;
-        $requesturi .= "&password=YwwZlCRX";
-        
+
+        if($accessid !== NULL)
+        {
+            $requesturi .= "&accessid=".$accessid;
+        }
+
+        if($secretkey !== NULL)
+        {
+            $requesturi .= "&secretkey=".$secretkey;
+        }
+
+        $requesturi .= "&password=".$password;
+
+        echo date("Y-m-d H:i:s", time()).' REQUEST URL = '.$requesturi.PHP_EOL;
+
         // cURL options
         $options = array(
             CURLOPT_URL            => $requesturi,// 取得する URL 。 curl_init() でセッションを 初期化する際に指定することも可能です。
@@ -537,6 +584,7 @@ class Domain_model extends CI_Model {
             CURLOPT_FRESH_CONNECT  => TRUE,// TRUE を設定すると、キャッシュされている接続を利用せずに 新しい接続を確立します。
             //CURLOPT_USERAGENT      => $agent,// HTTP リクエストで使用される "User-Agent: " ヘッダの内容。
             //CURLOPT_COOKIEFILE     => $cookiefile
+            CURLOPT_CONNECTTIMEOUT => 2,// 接続の試行を待ち続ける秒数。0 は永遠に待ち続けることを意味します。
         );
         
         // new cURL resource

@@ -49,6 +49,25 @@ $AccessID = AccessID;
 //Add your secretKey here
 $SecretKey = SecretKey;
 
+if(isset($_GET['accessid']) && !empty($_GET['accessid'])){
+    $AccessID = strval($_GET['accessid']);
+}
+
+if(isset($_GET['secretkey']) && !empty($_GET['secretkey'])){
+    $SecretKey = strval($_GET['secretkey']);
+}
+
+$password ="";
+$password = strval($_GET['password']);
+
+$url ="";
+$url = htmlspecialchars($_GET['url']);
+
+if(!$url || $password != Password ){
+    header("HTTP/1.0 400 Bad Request");
+    echo "<h1>400 Bad Request</h1>";
+    exit;
+}
 
 /*====================
   MAIN ACTIONS
@@ -57,25 +76,8 @@ $SecretKey = SecretKey;
 $authenticator = new Authenticator();
 $authenticator->setAccessID(AccessID);
 $authenticator->setSecretKey(SecretKey);
-$authenticator->setExpiresInterval(420);
+$authenticator->setExpiresInterval(300);
 
-if(isset($_GET['accessid']) && !empty($_GET['accessid'])){
-    $AccessID = strval($_GET['accessid']);
-}
-if(isset($_GET['secretkey']) && !empty($_GET['secretkey'])){
-    $SecretKey = strval($_GET['secretkey']);
-}
-
-$url ="";
-$url = htmlspecialchars($_GET['url']);
-
-$password ="";
-$password = htmlspecialchars($_GET['password']);
-
-if(!$url || $password != Password ){
-	header("HTTP/1.0 404 Not Found");
-	exit;
-}
 
 $xscope = "page_to_page";
 $xfilter = "external+follow";
@@ -121,9 +123,11 @@ if(!empty($response)){
 }
 
 if(isset($tableData)){
-	xml_Document($tableData);
+	$results = xml_Document($tableData);
+    header("Content-Type: text/xml; charset=utf-8");
+    echo $results;
 }else{
-	//xml_Document("-9");
+	echo "no data.";
 }
 
 
@@ -149,11 +153,12 @@ function xml_Document($tableData){
 	foreach($tableData as $val){
 		// code 属性の追加
 		$pref = $prefs->appendChild($dom->createElement('linkcheck'));
-		$pref->setAttribute('code', $i);
+		//$pref->setAttribute('code', $i);
 
-		foreach($val as $key => $val2){
-			$pref->appendChild($dom->createElement($key, $val2));
+		foreach($val as $key2 => $val2){
+			$pref->appendChild($dom->createElement($key2, $val2));
 		}
+		unset($key2,$val2);
 
 		$i++;
 	}
@@ -163,7 +168,6 @@ function xml_Document($tableData){
 	//XML を整形（改行・字下げ）して出力
 	$dom->formatOutput = true;
 
-	header("Content-Type: text/xml; charset=utf-8");
-	echo $dom->saveXML();
+	return $dom->saveXML();
 
 }

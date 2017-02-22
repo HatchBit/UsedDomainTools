@@ -39,3 +39,14 @@ Used domain scrutiny tool
 
 スクリプト手動実行
 /execute
+
+
+## STATUS 
+
+0 未処理（初期値）  
+-12 HTTPCODE.100-600  
+-1 HTTPCODE.それ以外  
+10000over 一時ステータス  
+-3 XML OK  
+-4 XML NG  
+30000over 一時ステータス  

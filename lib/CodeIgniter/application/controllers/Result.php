@@ -407,7 +407,8 @@ class Result extends CI_Controller {
     private function _set_param()
     {
         $results = array("whereparam" => NULL, "limit" => NULL, "offset" => 0, "sort" => NULL);
-        
+        $whereparam = array();
+
         if(get_cookie('startYear') && get_cookie('startMonth') && get_cookie('startDate') && get_cookie('endYear') && get_cookie('endMonth') && get_cookie('endDate'))
         {
             $startTime = mktime(0,0,0, intval(get_cookie('startMonth'),10), intval(get_cookie('startDate'),10), intval(get_cookie('startYear'),10));
@@ -479,14 +480,16 @@ class Result extends CI_Controller {
         $whereparam = array();
         $whereparam[] = array('kind'=>'where', 'colname'=>'mozcheck', 'value'=> 1);
         $this->data['countSiteMetChecked'] = $this->domain->get_count_domains($whereparam, 'domains');
-        
+
         $whereparam = array();
         $whereparam[] = array('kind'=>'where', 'colname'=>'totalLinks >', 'value'=> 0);
         $this->data['countLinkMetChecked'] = $this->domain->get_count_domains($whereparam, 'domainCheckSites');
-        
+
         $whereparam = array();
         $whereparam[] = array('kind'=>'or_where', 'colname'=>'http_code', 'value'=> -9);
         $whereparam[] = array('kind'=>'or_where', 'colname'=>'http_code >', 'value'=> 1000);
         $this->data['countLinkChecked'] = $this->domain->get_count_domains($whereparam, 'domainLinks');
+
+
     }
 }

@@ -208,7 +208,30 @@ class Cli extends CI_Controller {
         }
         else
         {
-            echo date("Y-m-d H:i:s", time()).' ドメインなしの為、処理途中終了'.PHP_EOL;
+            $whereparam = array();
+            $whereparam[] = array('kind'=>'where', 'colname'=>'http_code', 'value'=>0);
+            $checksitelist = $this->domain->get_checksites($whereparam, $num, 0, NULL);
+
+            if( $checksitelist )
+            {
+                foreach($checksitelist as $dl)
+                {
+                    $whereparam = $updatedata = array();
+                    $url = "http://".$dl['domainName'];
+                    $httpstatus = $this->domain->get_http_statuscode($url);
+                    echo date("Y-m-d H:i:s", time()).' '.$dl['domainName'].' '.$httpstatus.PHP_EOL;
+
+                    $updatedata['http_code'] = $httpstatus;
+                    $whereparam[] = array('kind' => 'where', 'colname' => 'id', 'value' => $dl['id']);
+                    $this->domain->update_domains($whereparam, $updatedata, 'domainCheckSites');
+                }
+                unset($dl);
+            }
+            else
+            {
+                echo date("Y-m-d H:i:s", time()).' ドメインなしの為、処理途中終了'.PHP_EOL;
+            }
+
         }
         echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
     }
@@ -219,12 +242,13 @@ class Cli extends CI_Controller {
  * DA・PA・被リンク数を取得し、DBへ格納
  * Status = -1 を対象に
  *
- * @param   integer   $sv     APIサーバーID
- * @param   integer   $num    処理件数
+ * @param   integer    $sv_min  APIサーバーID
+ * @param   integer    $sv_max  APIサーバーID
+ * @param   integer    $num     処理件数
  *
  * @response success -> domains.status = -3, failure -> domains.status = -4
  */
-    public function getxml($sv=NULL, $num=10, $debug=FALSE)
+    public function getxml($sv_min=1, $sv_max=100, $num=1000, $debug=FALSE)
     {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
         
@@ -256,42 +280,45 @@ class Cli extends CI_Controller {
         echo date("Y-m-d H:i:s", time()).' '.__FILE__ . PHP_EOL;
         
         // APIサーバー
-        if( $sv === NULL )
+
+        if($sv_max >= $sv_min)
         {
-            $svnum = rand(1,100);
+            $svmax = intval($sv_max);
+            $svmin = intval($sv_min);
+        }
+        elseif($sv_min > $sv_max)
+        {
+            $svmax = intval($sv_min);
+            $svmin = intval($sv_max);
         }
         else
         {
-            $svnum = intval($sv);
+            $svmax = 100;
+            $svmin = 1;
         }
-        echo date("Y-m-d H:i:s", time()).' sv='.$svnum.PHP_EOL;
+        echo date("Y-m-d H:i:s", time()).' SERVER NO. = '.$svmin.' - '.$svmax.PHP_EOL;
         
-        $apiservers = $this->domain->get_apiserver($svnum);
-        echo date("Y-m-d H:i:s", time()).' apiserver='.print_r($apiservers, true).PHP_EOL;
+        $cloud_urlmetrics_urls = array();
+        
+        for($i = $svmin; $i <= $svmax; $i++)
+        {
+        	$cloud_urlmetrics_urls[] = $this->domain->get_apiserver($i);
+        }        
+        $count_cuu = count($cloud_urlmetrics_urls);
 
-        $cloud_urlmetrics_url = $filename = '';
-        if($apiservers['name'])
-        {
-            $cloud_urlmetrics_url = $apiservers['name'];
-        }
-        if($apiservers['id'])
-        {
-            $filename = $apiservers['id'];
-        }
-        
-        
         // 処理
         // 対象ドメインを選定
-        $qstatus = 10000 + $filename;
+        $qstatus = 10000;
         $updatedata = $whereparam = array();
         $updatedata['status'] = $qstatus;
         $whereparam[] = array('kind' => 'where', 'colname' => 'status', 'value' => -1);
-        $this->domain->update_domains($whereparam, $updatedata);
+        $this->domain->update_domains($whereparam, $updatedata, "domains", $num);
         
         $domainlist = $this->domain->get_domains(NULL, $qstatus, $num, 0);
         
         if( $domainlist )
         {
+            $counter = 0;
             foreach($domainlist as $dl)
             {
                 $objectURLs = array();
@@ -300,13 +327,41 @@ class Cli extends CI_Controller {
                 
                 foreach($objectURLs as $objecturl)
                 {
+                    echo date("Y-m-d H:i:s", time()).' OBJECT URL = '.$objecturl.PHP_EOL;
+
                     $thissec = time();
                     //$requestUrl = str_replace('##DOMAIN##', $objecturl, $apiurl);
                     // seomoz.
                     //$response = $this->domain->get_response_body($requestUrl);
                     // XML を取得
-                    $response_xml = $this->domain->get_xml_object('xml', $cloud_urlmetrics_url, $objecturl, $accessID, $secretKey);
-                    
+                    // $response_xml = $this->domain->get_xml_object('xml', $cloud_urlmetrics_url, $objecturl, $accessID, $secretKey, 'YwwZlCRX');
+                    $cloud_urlmetrics_url = "";
+                    $counter++;
+                    if($counter <= $count_cuu)
+                    {
+                        $count_index = $counter - 1;
+                    }
+                    else
+                    {
+                        $count_index = ($counter % $count_cuu) - 1;
+                    }
+                    $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['name'];
+                    $access_id = $cloud_urlmetrics_urls[$count_index]['access_id'];
+                    $secret_key = $cloud_urlmetrics_urls[$count_index]['secret_key'];
+
+                    echo date("Y-m-d H:i:s", time()).' CLOUD URL METRICS URL = '.$cloud_urlmetrics_url.PHP_EOL;
+
+                    $response_xml = $this->domain->get_xml_object('xml', $cloud_urlmetrics_url, $objecturl, $access_id, $secret_key, 'YwwZlCRX');
+
+                    echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true).PHP_EOL;
+
+                    if(strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR empty($response_xml))
+                    {
+                        echo date("Y-m-d H:i:s", time()).' RESPONSE ERROR!'.PHP_EOL;
+                        $updatedata['status'] = -4;
+                        goto skipexecute1;
+                    }
+
                     // XML を配列に変換
                     $response = xml2array(simplexml_load_string($response_xml));
 
@@ -321,21 +376,25 @@ class Cli extends CI_Controller {
                     {
                         echo date("Y-m-d H:i:s", time()).' RESPONSE,'.json_encode($response).PHP_EOL;
                         $insertdata = array();
-                        if(isset($response['uid']))
+                        if(isset($response['linkcheck']))
                         {
-                            $insertdata['totalLinks'] = $response["uid"];
+                            $res = $response['linkcheck'];
                         }
-                        if(isset($response['upa']))
+                        if(isset($res['uid']))
                         {
-                            $insertdata['pageAuthority'] = $response["upa"];
+                            $insertdata['totalLinks'] = $res["uid"];
                         }
-                        if(isset($response['pda']))
+                        if(isset($res['upa']))
                         {
-                            $insertdata['domainAuthority'] = $response["pda"];
+                            $insertdata['pageAuthority'] = $res["upa"];
                         }
-                        if(isset($response['ueid']))
+                        if(isset($res['pda']))
                         {
-                            $insertdata['ueid'] = $response["ueid"];
+                            $insertdata['domainAuthority'] = $res["pda"];
+                        }
+                        if(isset($res['ueid']))
+                        {
+                            $insertdata['ueid'] = $res["ueid"];
                         }
                         $insertdata['domain_id'] = $dl['id'];
                         $insertdata['domainName'] = $objecturl;
@@ -349,24 +408,20 @@ class Cli extends CI_Controller {
                     }
                     else
                     {
+                        echo date("Y-m-d H:i:s", time()).' RESPONSE,'.json_encode($response).PHP_EOL;
                         $updatedata['status'] = -4;
                     }
+
+                    skipexecute1:
+
                     $whereparam[] = array('kind' => 'where', 'colname' => 'id', 'value' => $dl['id']);
                     $this->domain->update_domains($whereparam, $updatedata);
 
                     skipexecute:
 
-                    $responsesec = time() - $thissec;
-                    // delay 14 sec.
-                    if($responsesec < 14)
-                    {
-                        $delaysec = 14 - $responsesec;
-                    }
-                    else
-                    {
-                        $delaysec = 1;
-                    }
-                    sleep($delaysec);
+                    // delay
+                    usleep(10000);// マイクロ秒
+
                 }
                 unset($objecturl);
             }
@@ -385,8 +440,12 @@ class Cli extends CI_Controller {
  *
  * DA18以上・被リンク数5本以上のドメインに対し、被リンクURLを全て取得し、DBへ保存
  *
+ * @param   integer    $sv_min  APIサーバーID
+ * @param   integer    $sv_max  APIサーバーID
+ * @param   integer    $num     処理件数
+ *
  */
-    public function getolxml($sv=NULL, $num=10, $debug=FALSE)
+    public function getolxml($sv_min=101, $sv_max=200, $num=500, $debug=FALSE)
     {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
         
@@ -416,34 +475,36 @@ class Cli extends CI_Controller {
         //$apiurl = str_replace('##SIGNATURE##', $urlSafeSignature, $apiurl);
         
         echo date("Y-m-d H:i:s", time()).' '.__FILE__ . PHP_EOL;
-        
+
         // APIサーバー
-        if( $sv === NULL )
+        if($sv_max >= $sv_min)
         {
-            $svnum = rand(1,100);
+            $svmax = intval($sv_max);
+            $svmin = intval($sv_min);
+        }
+        elseif($sv_min > $sv_max)
+        {
+            $svmax = intval($sv_min);
+            $svmin = intval($sv_max);
         }
         else
         {
-            $svnum = intval($sv);
+            $svmax = 200;
+            $svmin = 101;
         }
-        echo date("Y-m-d H:i:s", time()).' sv='.$svnum.PHP_EOL;
-        
-        $apiservers = $this->domain->get_apiserver($svnum);
-        echo date("Y-m-d H:i:s", time()).' apiserver='.print_r($apiservers, true).PHP_EOL;
-        $cloud_urlmetrics_url = '';
-        if($apiservers['name'])
+        echo date("Y-m-d H:i:s", time()).' SERVER NO. = '.$svmin.' - '.$svmax.PHP_EOL;
+
+        $cloud_urlmetrics_urls = array();
+
+        for($i = $svmin; $i <= $svmax; $i++)
         {
-            $cloud_urlmetrics_url = $apiservers['name'];
+            $cloud_urlmetrics_urls[] = $this->domain->get_apiserver($i);
         }
-        $filename = 0;
-        if($apiservers['id'])
-        {
-            $filename = $apiservers['id'];
-        }
+        $count_cuu = count($cloud_urlmetrics_urls);
         
         // 処理
         // 対象ドメインを選定
-        $qstatus = 30000 + $filename;
+        $qstatus = 30000;
         $whereparam = array();
         $whereparam[] = array('kind' => 'where', 'colname' => 'domainAuthority >=', 'value' => 18);
         $whereparam[] = array('kind' => 'where', 'colname' => 'ueid >=', 'value' => 5);
@@ -470,17 +531,20 @@ class Cli extends CI_Controller {
         $updatedata = $whereparam = array();
         $updatedata['status'] = $qstatus;
         $whereparam[] = array('kind' => 'where_in', 'colname' => 'id', 'value' => $domain_ids);
-        $this->domain->update_domains($whereparam, $updatedata);
+        $this->domain->update_domains($whereparam, $updatedata, "domains", $num);
         
         $domainlist = $this->domain->get_domains(NULL, $qstatus, $num, 0);
         echo date("Y-m-d H:i:s", time()).' domainlist,'.count($domainlist).PHP_EOL;
         
         if( $domainlist )
         {
+            $counter = 0;
             foreach($domainlist as $dl)
             {
                 $objecturl = $dl['domainname'];
                 $thissec = time();
+                echo date("Y-m-d H:i:s", time()).' OBJECT URL = '.$objecturl.PHP_EOL;
+
                 // DAPA からインテグレート
                 //$requestUrl = str_replace('##DOMAIN##', $objecturl, $apiurl);
                 //echo date("Y-m-d H:i:s", time()).' REQUEST URL : '.$requestUrl.PHP_EOL;
@@ -488,8 +552,32 @@ class Cli extends CI_Controller {
                 // seomoz.
                 //$response = $this->domain->get_response_body($requestUrl);
                 // XML を取得
-                $response_xml = $this->domain->get_xml_object('ol_xml', $cloud_urlmetrics_url, $objecturl, $accessID, $secretKey);
-                
+                //$response_xml = $this->domain->get_xml_object('ol_xml', $cloud_urlmetrics_url, $objecturl, $accessID, $secretKey, 'YwwZlCRX');
+                $counter++;
+                if($counter <= $count_cuu)
+                {
+                    $count_index = $counter - 1;
+                }
+                else
+                {
+                    $count_index = ($counter % $count_cuu) - 1;
+                }
+                $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['name'];
+                $access_id = $cloud_urlmetrics_urls[$count_index]['access_id'];
+                $secret_key = $cloud_urlmetrics_urls[$count_index]['secret_key'];
+
+                echo date("Y-m-d H:i:s", time()).' CLOUD URL METRICS URL = '.$cloud_urlmetrics_url.PHP_EOL;
+
+                $response_xml = $this->domain->get_xml_object('ol_xml', $cloud_urlmetrics_url, $objecturl, $access_id, $secret_key, 'YwwZlCRX');
+
+                echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true);
+
+                if(strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR empty($response_xml))
+                {
+                    echo date("Y-m-d H:i:s", time()).' RESPONSE ERROR!'.PHP_EOL;
+                    goto skipexecute1;
+                }
+
                 // XML を配列に変換
                 $response = xml2array(simplexml_load_string($response_xml));
 
@@ -544,19 +632,13 @@ class Cli extends CI_Controller {
                     $this->domain->update_domains($whereparam, $updatedata, "domainCheckSites");
                 }
 
+                skipexecute1:
+
                 skipexecute:
 
-                $responsesec = time() - $thissec;
                 // delay 14 sec.
-                if($responsesec < 14)
-                {
-                    $delaysec = 14 - $responsesec;
-                }
-                else
-                {
-                    $delaysec = 1;
-                }
-                sleep($delaysec);
+                usleep(10000);// マイクロ秒
+
             }
             unset($dl);
         }
