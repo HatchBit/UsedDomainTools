@@ -355,7 +355,7 @@ class Cli extends CI_Controller {
 
                     echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true).PHP_EOL;
 
-                    if(strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR empty($response_xml))
+                    if(strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR strpos($response_xml, 'ERROR:') !== FALSE OR empty($response_xml))
                     {
                         echo date("Y-m-d H:i:s", time()).' RESPONSE ERROR!'.PHP_EOL;
                         $updatedata['status'] = -4;
@@ -572,7 +572,7 @@ class Cli extends CI_Controller {
 
                 echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true);
 
-                if(strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR empty($response_xml))
+                if(strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR strpos($response_xml, 'ERROR:') !== FALSE OR empty($response_xml))
                 {
                     echo date("Y-m-d H:i:s", time()).' RESPONSE ERROR!'.PHP_EOL;
                     goto skipexecute1;
