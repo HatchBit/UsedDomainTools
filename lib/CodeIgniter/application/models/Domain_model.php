@@ -25,7 +25,55 @@ class Domain_model extends CI_Model {
         chmod($downloadfile, 0666);
         return $downloadfile;
     }
-    
+
+    /**
+     * @param string $filepath
+     * @param string $paid
+     * @return array
+     */
+    public function insert_accessid_from_csv($filepath="", $paid = "free")
+    {
+        $results = array();
+        setlocale(LC_ALL, 'ja_JP');
+        $fp = fopen($filepath, "r");
+        $inserted = array();
+
+        $this->db->trans_start();
+        while(($line = fgetcsv($fp, NULL, ',', '"')) !== FALSE)
+        {
+            $accessid = trim($line[0]);
+            $secretkey = trim($line[1]);
+
+            if (isset($line[2]))
+            {
+                $paid = $line[2];
+            }
+            elseif (empty($paid))
+            {
+                $paid = 'free';
+            }
+
+            if (strpos($accessid, 'mozscape') === FALSE)
+            {
+                continue;
+            }
+            // エラー回避したのでDB登録
+            $insertdata = array(
+                'accessid' => $accessid,
+                'secretkey' => $secretkey,
+                'kind' => $paid,
+                'status' => 1,
+            );
+            $results[] = $insertdata;
+            $this->db->insert('identify', $insertdata);
+            $inserted[] = $accessid;
+
+        }
+        $this->db->trans_complete();
+
+        return $results;
+    }
+
     /**
      * CSVファイルを登録
      * 
@@ -484,7 +532,30 @@ class Domain_model extends CI_Model {
         //return $result;
         return $return;
     }
-    
+
+    /**
+     * @param string $kind
+     * @param int    $status
+     * @return array
+     */
+    public function get_accessid($kind = 'free', $status = 1)
+    {
+        $results = array();
+
+        $this->db->from('identify');
+        $this->db->where('kind', $kind);
+        $this->db->where('status', $status);
+        $query = $this->db->get();
+
+        // 結果
+        foreach ($query->result_array() as $row)
+        {
+            $results[] = $row;
+        }
+
+        return $results;
+    }
+
     public function get_apiserver($svnum=NULL)
     {
         $result = array();
