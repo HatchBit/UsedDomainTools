@@ -62,7 +62,7 @@ class Domain_model extends CI_Model {
                 'status' => $status,
             );
             $results[] = $insertdata;
-            $this->db->insert('apisv', $insertdata);
+            $this->db->replace('apisv', $insertdata);
             $inserted[] = $name;
         }
         $this->db->trans_complete();
@@ -94,7 +94,7 @@ class Domain_model extends CI_Model {
             {
                 $paid = 'free';
             }
-            if (strpos($accessid, 'mozscape') === FALSE)
+            if (strpos($accessid, 'mozscape-') === FALSE && strpos($accessid, 'member-') === FALSE)
             {
                 continue;
             }
@@ -106,7 +106,7 @@ class Domain_model extends CI_Model {
                 'status' => 1,
             );
             $results[] = $insertdata;
-            $this->db->insert('identify', $insertdata);
+            $this->db->replace('identify', $insertdata);
             $inserted[] = $accessid;
         }
         $this->db->trans_complete();
