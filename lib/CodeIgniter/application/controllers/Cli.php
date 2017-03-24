@@ -280,7 +280,6 @@ class Cli extends CI_Controller {
         echo date("Y-m-d H:i:s", time()).' '.__FILE__ . PHP_EOL;
         
         // APIサーバー
-
         if($sv_max >= $sv_min)
         {
             $svmax = intval($sv_max);
@@ -302,7 +301,11 @@ class Cli extends CI_Controller {
         $cloud_urlmetrics_urls = array();
         for($i = $svmin; $i <= $svmax; $i++)
         {
-        	$cloud_urlmetrics_urls[] = $this->domain->get_apiserver($i);
+        	$param = array();
+            $param[] = array('kind'=>'where', 'colname'=>'status', 'value'=>1);
+            $param[] = array('kind'=>'order_by', 'colname'=>'id', 'value'=>'DESC');
+            $param[] = array('kind'=>'limit', 'colname'=>'limit', 'value'=>'1, '.$i);
+            $cloud_urlmetrics_urls[] = $this->domain->get_apiserver($param);
         }        
         $count_cuu = count($cloud_urlmetrics_urls);
 
@@ -442,7 +445,7 @@ class Cli extends CI_Controller {
                     // Free access allows you to make one request every ten seconds,
                     // up to 25,000 rows per month.
                     // https://moz.com/products/api/pricing
-                    sleep(10);
+                    sleep(1);
 
                 }
                 unset($objecturl);
@@ -520,7 +523,11 @@ class Cli extends CI_Controller {
         $cloud_urlmetrics_urls = array();
         for($i = $svmin; $i <= $svmax; $i++)
         {
-            $cloud_urlmetrics_urls[] = $this->domain->get_apiserver($i);
+            $param = array();
+            $param[] = array('kind'=>'where', 'colname'=>'status', 'value'=>1);
+            $param[] = array('kind'=>'order_by', 'colname'=>'id', 'value'=>'DESC');
+            $param[] = array('kind'=>'limit', 'colname'=>'limit', 'value'=>'1, '.$i);
+            $cloud_urlmetrics_urls[] = $this->domain->get_apiserver($param);
         }
         $count_cuu = count($cloud_urlmetrics_urls);
 
@@ -680,7 +687,7 @@ class Cli extends CI_Controller {
                 // Free access allows you to make one request every ten seconds,
                 // up to 25,000 rows per month.
                 // https://moz.com/products/api/pricing
-                sleep(10);
+                sleep(1);
 
             }
             unset($dl);

@@ -494,7 +494,19 @@ class Domain_model extends CI_Model {
                     case 'where_in':
                         $this->db->where_in($colname, $colvalue);
                     break;
-                    
+
+                    case 'limit':
+                        if (strpos($colvalue, ',') === FALSE)
+                        {
+                            $this->db->limit($colvalue);
+                        }
+                        else
+                        {
+                            $limitarr = explode(',', $colvalue, 2);
+                            $this->db->limit($limitarr[0], $limitarr[1]);
+                        }
+                        break;
+
                     case 'where':
                     default:
                         $this->db->where($colname, $colvalue);
@@ -644,6 +656,18 @@ class Domain_model extends CI_Model {
                         $this->db->order_by($colname, $colvalue);
                         break;
 
+                    case 'limit':
+                        if (strpos($colvalue, ',') === FALSE)
+                        {
+                            $this->db->limit($colvalue);
+                        }
+                        else
+                        {
+                            $limitarr = explode(',', $colvalue, 2);
+                            $this->db->limit($limitarr[0], $limitarr[1]);
+                        }
+                        break;
+
                     case 'where':
                     default:
                         $this->db->where($colname, $colvalue);
@@ -668,15 +692,72 @@ class Domain_model extends CI_Model {
         return $results;
     }
 
-    public function get_apiserver($svnum=NULL)
+    public function get_apiserver($param=NULL)
     {
         $result = array();
-        if( ! $svnum)
-        {
-            $svnum = rand(1,100);
-        }
+
         $this->db->from('apisv');
-        $this->db->where('id', $svnum);
+        if ( ! empty($param))
+        {
+            foreach($param as $val)
+            {
+                $colname = $val['colname'];
+                $colvalue = $val['value'];
+
+                switch($val['kind'])
+                {
+                    case 'or_like':
+                        $this->db->or_like($colname, $colvalue, 'both');
+                        break;
+
+                    case 'like':
+                        $this->db->like($colname, $colvalue, 'both');
+                        break;
+
+                    case 'or_where_not_in':
+                        $this->db->or_where_not_in($colname, $colvalue);
+                        break;
+
+                    case 'where_not_in':
+                        $this->db->where_not_in($colname, $colvalue);
+                        break;
+
+                    case 'or_where_in':
+                        $this->db->or_where_in($colname, $colvalue);
+                        break;
+
+                    case 'where_in':
+                        $this->db->where_in($colname, $colvalue);
+                        break;
+
+                    case 'or_where':
+                        $this->db->or_where($colname, $colvalue);
+                        break;
+
+                    case 'order_by':
+                        $this->db->order_by($colname, $colvalue);
+                        break;
+
+                    case 'limit':
+                        if (strpos($colvalue, ',') === FALSE)
+                        {
+                            $this->db->limit($colvalue);
+                        }
+                        else
+                        {
+                            $limitarr = explode(',', $colvalue, 2);
+                            $this->db->limit($limitarr[0], $limitarr[1]);
+                        }
+                        break;
+
+                    case 'where':
+                    default:
+                        $this->db->where($colname, $colvalue);
+                        break;
+                }
+            }
+            unset($val);
+        }
         $query = $this->db->get();
         $row = $query->row_array();
         if (isset($row))
@@ -762,6 +843,7 @@ class Domain_model extends CI_Model {
 
         echo date("Y-m-d H:i:s", time()).' REQUEST URL = '.$requesturi.PHP_EOL;
 
+        $agent = "Domain Tools 0.1";
         // cURL options
         $options = array(
             CURLOPT_URL            => $requesturi,// 取得する URL 。 curl_init() でセッションを 初期化する際に指定することも可能です。
@@ -769,7 +851,7 @@ class Domain_model extends CI_Model {
             CURLOPT_NOBODY         => FALSE,// TRUE を設定すると、出力から本文を削除します。 リクエストメソッドは HEAD となります。これを FALSE に変更してもリクエストメソッドは GET には変わりません。
             CURLOPT_RETURNTRANSFER => TRUE,// TRUE を設定すると、 curl_exec() の返り値を 文字列で返します。通常はデータを直接出力します。
             CURLOPT_FRESH_CONNECT  => TRUE,// TRUE を設定すると、キャッシュされている接続を利用せずに 新しい接続を確立します。
-            //CURLOPT_USERAGENT      => $agent,// HTTP リクエストで使用される "User-Agent: " ヘッダの内容。
+            CURLOPT_USERAGENT      => $agent,// HTTP リクエストで使用される "User-Agent: " ヘッダの内容。
             //CURLOPT_COOKIEFILE     => $cookiefile
             CURLOPT_CONNECTTIMEOUT => 2,// 接続の試行を待ち続ける秒数。0 は永遠に待ち続けることを意味します。
         );
