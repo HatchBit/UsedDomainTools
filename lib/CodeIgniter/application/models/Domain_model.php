@@ -303,6 +303,73 @@ class Domain_model extends CI_Model {
         return $results;
     }
 
+    public function get_domainLinks($whereparam=NULL, $limit=NULL, $offset=0)
+    {
+        $results = array();
+        if( $whereparam !== NULL )
+        {
+            foreach($whereparam as $val)
+            {
+                $colname = $val['colname'];
+                $colvalue = $val['value'];
+
+                switch($val['kind'])
+                {
+                    case 'or_like':
+                        $this->db->or_like($colname, $colvalue, 'both');
+                        break;
+
+                    case 'like':
+                        $this->db->like($colname, $colvalue, 'both');
+                        break;
+
+                    case 'or_where_not_in':
+                        $this->db->or_where_not_in($colname, $colvalue);
+                        break;
+
+                    case 'where_not_in':
+                        $this->db->where_not_in($colname, $colvalue);
+                        break;
+
+                    case 'or_where_in':
+                        $this->db->or_where_in($colname, $colvalue);
+                        break;
+
+                    case 'where_in':
+                        $this->db->where_in($colname, $colvalue);
+                        break;
+
+                    case 'or_where':
+                        $this->db->or_where($colname, $colvalue);
+                        break;
+
+                    case 'order_by':
+                        $this->db->order_by($colname, $colvalue);
+                        break;
+
+                    case 'where':
+                    default:
+                        $this->db->where($colname, $colvalue);
+                        break;
+                }
+            }
+            unset($val);
+        }
+        if( ! empty($limit))
+        {
+            $this->db->limit($limit, $offset);
+        }
+        $this->db->from('domainLinks');
+        //$this->db->join('domains', 'domains.id = domainCheckSites.domain_id');
+        //$this->db->select('domain_id, domainname, colname, coltype, colvalue, colnum, status');
+        $query = $this->db->get();
+        foreach ($query->result_array() as $row)
+        {
+            $results[] = $row;
+        }
+        return $results;
+    }
+
     public function get_checksites($whereparam=NULL, $limit=NULL, $offset=0)
     {
         $results = array();
@@ -341,6 +408,10 @@ class Domain_model extends CI_Model {
 
                     case 'or_where':
                         $this->db->or_where($colname, $colvalue);
+                        break;
+
+                    case 'order_by':
+                        $this->db->order_by($colname, $colvalue);
                         break;
 
                     case 'where':

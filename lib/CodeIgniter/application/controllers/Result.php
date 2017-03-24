@@ -31,7 +31,9 @@ class Result extends CI_Controller {
         $this->_counter();
         
         $cookieLimit = time() + 60 * 60 * 24 * 90;// 90日
-        
+
+        /*
+
         if( get_cookie('startYear') === NULL)
         {
             set_cookie('startYear', 2010, $cookieLimit);
@@ -133,13 +135,27 @@ class Result extends CI_Controller {
             set_cookie('displaymax', 1000, $cookieLimit);
         }
         //$this->data['cookie'] = $_COOKIE;
+         */
     }
     
     public function index()
     {
         $this->load->view('result', $this->data);
     }
-    
+
+    public function linkmets($domain_id = NULL)
+    {
+        $results = array();
+
+        $param = array();
+        $param[] = array('kind'=>'where', 'colname'=>'domain_id', 'value'=>$domain_id);
+        $param[] = array('kind'=>'order_by', 'colname'=>'id', 'value'=>'DESC');
+        $results = $this->domain->get_domainLinks($param);
+
+        $this->data['results'] = $results;
+        $this->load->view('result-linkmets', $this->data);
+    }
+
     public function searchlist($n=NULL)
     {
         switch($n)

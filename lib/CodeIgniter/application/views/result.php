@@ -192,7 +192,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             <?php
                                                 // 年
                                                 $options = array();
-                                                $selected = NULL;
+                                                $selected = date("Y");
                                                 for($endYear = 2010; $endYear <= date("Y"); $endYear++)
                                                 {
                                                     $options[$endYear] = $endYear."年";
@@ -206,7 +206,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             <?php
                                                 // 月
                                                 $options = array();
-                                                $selected = NULL;
+                                                $selected = date("n");
                                                 for($endMonth = 1; $endMonth <= 12; $endMonth++)
                                                 {
                                                     $options[$endMonth] = $endMonth."月";
@@ -220,7 +220,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             <?php
                                                 // 日
                                                 $options = array();
-                                                $selected = NULL;
+                                                $selected = 31;
                                                 for($endDate = 1; $endDate <= 31; $endDate++)
                                                 {
                                                     $options[$endDate] = $endDate."日";
@@ -345,23 +345,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <td class="text-right"><?php echo $sr['domainAuthority']; ?></td>
                                 <td class="text-right"><?php echo $sr['totalLinks']; ?></td>
                                 <td class="text-right"><?php echo $sr['linkRootDomain']; ?></td>
-                                <td class="text-right"><?php echo $sr['LostlinksMet']; ?> - <?php echo $sr['linksMet']; ?></td>
+                                <td class="text-right"><a href="/useddomaintools/result/linkmets/<?php echo $sr['domain_id']; ?>" ></a><?php echo $sr['LostlinksMet']; ?> - <?php echo $sr['linksMet']; ?></td>
                                 <td>
                                     <?php if($sr['url']): ?>
                                     <table class="table table-condensed">
                                         <tr>
                                             <td>
-                                                <a href="http://web.archive.org/web/20170000000000/http://<?php echo $sr['url']; ?>">
+                                                <a href="http://web.archive.org/web/20170000000000/http://<?php echo $sr['url']; ?>" target="_blank">
                                                     <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20170000000000/http://<?php echo $sr['url']; ?>" alt="" width="200" height="150" />
                                                 </a>
                                             </td>
                                             <td>
-                                                <a href="http://web.archive.org/web/20090000000000/http://<?php echo $sr['url']; ?>">
+                                                <a href="http://web.archive.org/web/20090000000000/http://<?php echo $sr['url']; ?>" target="_blank">
                                                     <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20090000000000/http://<?php echo $sr['url']; ?>" alt="" width="200" height="150" />
                                                 </a>
                                             </td>
                                             <td>
-                                                <a href="http://web.archive.org/web/20020000000000/http://<?php echo $sr['url']; ?>">
+                                                <a href="http://web.archive.org/web/20020000000000/http://<?php echo $sr['url']; ?>" target="_blank">
                                                     <img src="http://capture.heartrails.com/400x300?http://web.archive.org/web/20020000000000/http://<?php echo $sr['url']; ?>" alt="" width="200" height="150" />
                                                 </a>
                                             </td>
