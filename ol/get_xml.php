@@ -74,8 +74,8 @@ if(!$url || $password != Password ){
   ====================*/
 
 $authenticator = new Authenticator();
-$authenticator->setAccessID(AccessID);
-$authenticator->setSecretKey(SecretKey);
+$authenticator->setAccessID($AccessID);
+$authenticator->setSecretKey($SecretKey);
 $authenticator->setExpiresInterval(300);
 
 
@@ -102,8 +102,8 @@ $authenticator->setExpiresInterval(300);
 //$response = $linksService->getLinks($url, $options);
 
 $col = 0;
-$col += 1;//Title	1	ut	The title of the page, if available	yes
-$col += 4;//Canonical URL	4	uu	The canonical form of the URL	yes
+//$col += 1;//Title	1	ut	The title of the page, if available	yes
+//$col += 4;//Canonical URL	4	uu	The canonical form of the URL	yes
 //$col += 8;//Subdomain	8	ufq	The subdomain of the URL (for example, apiwiki.moz.com) no
 //$col += 16;//Root Domain	16	upl	The root domain of the URL (for example, moz.com)	no
 $col += 32;//External Links	32	ueid	The number of external equity links to the URL	yes
@@ -115,8 +115,8 @@ $col += 32;//External Links	32	ueid	The number of external equity links to the U
 $col += 2048;//Links	2048	uid	The number of links (equity or nonequity or not, internal or external) to the URL	yes
 //$col += 4096;//Subdomain Subdomains Linking	4096	fid	The number of subdomains with any pages linking to the subdomain of the URL	no
 //$col += 8192;//Root Domain Root Domains Linking	8192	pid	The number of root domains with any pages linking to the root domain of the URL	no
-$col += 16384;//MozRank	16384	umrp umrr	The MozRank of the URL, in both the normalized 10-point score (umrp) and the raw score (umrr)	yes
-$col += 32768;//Subdomain MozRank	32768	fmrp fmrr	The MozRank of the subdomain of the URL, in both the normalized 10-point score (fmrp) and the raw score (fmrr)	yes
+//$col += 16384;//MozRank	16384	umrp umrr	The MozRank of the URL, in both the normalized 10-point score (umrp) and the raw score (umrr)	yes
+//$col += 32768;//Subdomain MozRank	32768	fmrp fmrr	The MozRank of the subdomain of the URL, in both the normalized 10-point score (fmrp) and the raw score (fmrr)	yes
 //$col += 65536;//Root Domain MozRank	65536	pmrp pmrr	The MozRank of the Root Domain of the URL, in both the normalized 10-point score (pmrp) and the raw score (pmrr) no
 //$col += 131072;//MozTrust	131072	utrp utrr	The MozTrust of the URL, in both the normalized 10-point score (utrp) and the raw score (utrr)	no
 //$col += 262144;//Subdomain MozTrust	262144	ftrp ftrr	The MozTrust of the subdomain of the URL, in both the normalized 10-point score (ftrp) and the raw score (ftrr) no
@@ -125,7 +125,7 @@ $col += 32768;//Subdomain MozRank	32768	fmrp fmrr	The MozRank of the subdomain o
 //$col += 2097152;//Subdomain External Link Equity	2097152	fejp fejr	The portion of the MozRank of all pages on the subdomain coming from external links, in both the normalized 10-digit score (pejp) and the raw score	no Root Domain External Link Equity	4194304	pejp pejr	The portion of the MozRank of all pages on the root domain coming from external links, in both the normalized 10-digit score (pejp) and the raw source	no
 //$col += 8388608;//Subdomain Link Equity	8388608	fjp fjr	The MozRank of all pages on the subdomain combined, in both the normalized 10-point score (fjp) and the raw score (fjr)	no
 //$col += 16777216;//Root Domain Link Equity	16777216	pjp pjr	The MozRank of all pages on the root domain combined, in both the normalized 10-point score (pjp) and the raw score (pjr)	no
-$col += 536870912;//HTTP Status Code	536870912	us	The HTTP status code recorded by Mozscape for this URL, if available	yes
+//$col += 536870912;//HTTP Status Code	536870912	us	The HTTP status code recorded by Mozscape for this URL, if available	yes
 //$col += 4294967296;//Links to Subdomain	4294967296	fuid	The total number of links (including internal and nofollow links) to the subdomain of the URL	no
 //$col += 8589934592;//Links to Root Domain	8589934592	puid	The total number of links, including internal and nofollow links, to the root domain of the URL	no
 //$col += 17179869184;//Root Domains Linking to Subdomain	17179869184	fipl	The number of root domains with at least one link to the subdomain of the URL	no

@@ -1,10 +1,14 @@
 <?php
+/**
+ * Copyright (c) 2017. HatchBit & Co.
+ */
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 ?><!doctype html>
-<html lang="ja">
+<html lang="ja"
 <head>
     <meta charset="UTF-8">
-    <title>ドメインDB登録</title>
+    <title>アクセスID登録</title>
     <base href="http://54.204.4.15/useddomaintools">
     <script src="/useddomaintools/lib/jQuery/jquery-3.1.1.min.js"></script>
     <script src="/useddomaintools/lib/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -27,12 +31,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-left">
                     <li><a href="/useddomaintools/">トップ</a></li>
-                    <li class="active"><a href="/useddomaintools/insertdomain">ドメインDB登録</a></li>
+                    <li><a href="/useddomaintools/insertdomain">ドメインDB登録</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">アクセスID <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="/useddomaintools/accessid">リスト</a></li>
-                            <li><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
+                            <li class="active"><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
                             <li><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
                         </ul>
                     </li>
@@ -51,43 +55,62 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="row">
             <div class="col-sm-3 col-md-2 sidebar">
                 <ul class="nav nav-sidebar">
-                    <li><a href="/useddomaintools/insertdomain">ドメインDB登録 <span class="sr-only">(*)</span></a></li>
+                    <li><a href="/useddomaintools/accessid">リスト</a></li>
+                    <li class="active"><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
+                    <li><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 </ul>
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-                <div class="row">
-                    <h1 class="page-header">ドメインDB登録</h1>
-                </div>
-                <div class="row">
-                    <h2 id="csv">CSVファイルアップロード</h2>
-                    <?php if ($results): ?>
-                    <p>ドメインを登録しました。</p>
-                    <table class="table table-striped">
+                <h1 class="page-header">アクセスID登録</h1>
+                <?php if (isset($msg)): ?>
+                <?php foreach($msg as $ms): ?>
+                <div class="alert alert-<?php echo $ms['kind']; ?>"><?php echo $ms['message']; ?></div>
+                <?php endforeach; ?>
+                <?php endif; ?>
+
+                <?php if (isset($results)): ?>
+                    <h2>アップロードされたアクセスID</h2>
+                    <table class="table table-striped table-condensed">
                         <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Domain name</th>
-                                <th>Expire date</th>
-                            </tr>
+                        <tr>
+                            <th>Access ID</th>
+                            <th>Secret Key</th>
+                        </tr>
                         </thead>
                         <tbody>
-                        <?php $i = 0; ?>
-                        <?php foreach($results as $r): ?>
-                        <?php $i++; ?>
-                            <tr>
-                                <td><?php echo $i; ?></td>
-                                <td><?php echo $r['domainname']; ?></td>
-                                <td><?php echo $r['expiredatetime']; ?></td>
-                            </tr>
+                        <?php foreach ($results as $item): ?>
+                        <tr>
+                            <td><?php echo $item['accessid']; ?></td>
+                            <td><?php echo $item['secretkey']; ?></td>
+                        </tr>
                         <?php endforeach; ?>
                         </tbody>
                     </table>
-                    <?php else: ?>
-                    <p>登録できるデータがありませんでした。</p>
-                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php echo form_open_multipart('accessid/upload');?>
+                <input type="hidden" name="MAX_FILE_SIZE" value="20000000">
+                <div class="form-group">
+                    <label for="csvfile" class="control-label">CSVファイル</label>
+                    <input type="file" name="csvfile" id="csvfile">
                 </div>
+                <div class="form-group">
+                    <label for="paid-free" class="control-label">
+                        <input type="radio" name="paid" value="free" id="paid-free" checked>
+                        無料アカウント
+                    </label>
+                    <label for="paid-paid" class="control-label">
+                        <input type="radio" name="paid" value="paid" id="paid-paid">
+                        有料アカウント
+                    </label>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-default">CSVファイルアップロード</button>
+                </div>
+                <?php echo form_close(); ?>
+                
             </div>
         </div>
     </div>

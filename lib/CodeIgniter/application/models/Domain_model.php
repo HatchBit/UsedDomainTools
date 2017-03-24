@@ -25,7 +25,55 @@ class Domain_model extends CI_Model {
         chmod($downloadfile, 0666);
         return $downloadfile;
     }
-    
+
+    /**
+     * @param string $filepath
+     * @param string $paid
+     * @return array
+     */
+    public function insert_accessid_from_csv($filepath="", $paid = "free")
+    {
+        $results = array();
+        setlocale(LC_ALL, 'ja_JP');
+        $fp = fopen($filepath, "r");
+        $inserted = array();
+
+        $this->db->trans_start();
+        while(($line = fgetcsv($fp, NULL, ',', '"')) !== FALSE)
+        {
+            $accessid = trim($line[0]);
+            $secretkey = trim($line[1]);
+
+            if (isset($line[2]))
+            {
+                $paid = $line[2];
+            }
+            elseif (empty($paid))
+            {
+                $paid = 'free';
+            }
+
+            if (strpos($accessid, 'mozscape') === FALSE)
+            {
+                continue;
+            }
+            // エラー回避したのでDB登録
+            $insertdata = array(
+                'accessid' => $accessid,
+                'secretkey' => $secretkey,
+                'kind' => $paid,
+                'status' => 1,
+            );
+            $results[] = $insertdata;
+            $this->db->insert('identify', $insertdata);
+            $inserted[] = $accessid;
+
+        }
+        $this->db->trans_complete();
+
+        return $results;
+    }
+
     /**
      * CSVファイルを登録
      * 
@@ -484,7 +532,31 @@ class Domain_model extends CI_Model {
         //return $result;
         return $return;
     }
-    
+
+    /**
+     * @param string $kind
+     * @param int    $status
+     * @return array
+     */
+    public function get_accessid($kind = 'free', $status = 1)
+    {
+        $results = array();
+
+        $this->db->from('identify');
+        $this->db->where('kind', $kind);
+        $this->db->where('status', $status);
+        $this->db->order_by('accessid', 'ASC');
+        $query = $this->db->get();
+
+        // 結果
+        foreach ($query->result_array() as $row)
+        {
+            $results[] = $row;
+        }
+
+        return $results;
+    }
+
     public function get_apiserver($svnum=NULL)
     {
         $result = array();
@@ -573,7 +645,7 @@ class Domain_model extends CI_Model {
 
         $requesturi .= "&password=".$password;
 
-        echo date("Y-m-d H:i:s", time()).' REQUEST URL = '.$requesturi.PHP_EOL;
+        // echo date("Y-m-d H:i:s", time()).' REQUEST URL = '.$requesturi.PHP_EOL;
 
         // cURL options
         $options = array(
@@ -582,9 +654,9 @@ class Domain_model extends CI_Model {
             CURLOPT_NOBODY         => FALSE,// TRUE を設定すると、出力から本文を削除します。 リクエストメソッドは HEAD となります。これを FALSE に変更してもリクエストメソッドは GET には変わりません。
             CURLOPT_RETURNTRANSFER => TRUE,// TRUE を設定すると、 curl_exec() の返り値を 文字列で返します。通常はデータを直接出力します。
             CURLOPT_FRESH_CONNECT  => TRUE,// TRUE を設定すると、キャッシュされている接続を利用せずに 新しい接続を確立します。
-            //CURLOPT_USERAGENT      => $agent,// HTTP リクエストで使用される "User-Agent: " ヘッダの内容。
+            CURLOPT_USERAGENT      => "FaberTools0.1",// HTTP リクエストで使用される "User-Agent: " ヘッダの内容。
             //CURLOPT_COOKIEFILE     => $cookiefile
-            CURLOPT_CONNECTTIMEOUT => 2,// 接続の試行を待ち続ける秒数。0 は永遠に待ち続けることを意味します。
+            CURLOPT_CONNECTTIMEOUT => 0,// 接続の試行を待ち続ける秒数。0 は永遠に待ち続けることを意味します。
         );
         
         // new cURL resource
@@ -593,6 +665,8 @@ class Domain_model extends CI_Model {
         
         // execute.
         $response = curl_exec($ch);
+        // echo date("Y-m-d H:i:s", time()).' RESPONSE = '.substr($response, 0, 500).PHP_EOL;
+
         // close.
         curl_close($ch);
         
