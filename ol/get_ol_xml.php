@@ -78,7 +78,6 @@ $authenticator->setAccessID(AccessID);
 $authenticator->setSecretKey(SecretKey);
 $authenticator->setExpiresInterval(300);
 
-
 $xscope = "page_to_page";
 $xfilter = "external+follow";
 $xsort = "page_authority";
