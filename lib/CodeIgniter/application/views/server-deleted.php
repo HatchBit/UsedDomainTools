@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="ja"
 <head>
     <meta charset="UTF-8">
-    <title>アクセスID登録</title>
+    <title>削除済みサーバー</title>
     <base href="http://54.204.4.15/useddomaintools">
     <script src="/useddomaintools/lib/jQuery/jquery-3.1.1.min.js"></script>
     <script src="/useddomaintools/lib/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -37,7 +37,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <ul class="dropdown-menu">
                             <li><a href="/useddomaintools/accessid">リスト</a></li>
                             <li><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
-                            <li class="active"><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
+                            <li><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -45,7 +45,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <ul class="dropdown-menu">
                             <li><a href="/useddomaintools/server">リスト</a></li>
                             <li><a href="/useddomaintools/server/upload">登録フォーム</a></li>
-                            <li><a href="/useddomaintools/server/deleted">削除済みリスト</a></li>
+                            <li class="active"><a href="/useddomaintools/server/deleted">削除済みリスト</a></li>
                         </ul>
                     </li>
                     <li><a href="/useddomaintools/result">精査結果</a></li>
@@ -63,9 +63,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="row">
             <div class="col-sm-3 col-md-2 sidebar">
                 <ul class="nav nav-sidebar">
-                    <li><a href="/useddomaintools/accessid">リスト</a></li>
-                    <li><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
-                    <li class="active"><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
+                    <li><a href="/useddomaintools/server">リスト</a></li>
+                    <li><a href="/useddomaintools/server/upload">登録フォーム</a></li>
+                    <li class="active"><a href="/useddomaintools/server/deleted">削除済みリスト</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 </ul>
@@ -78,54 +78,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <?php endforeach; ?>
                 <?php endif; ?>
                 
-                <?php if (isset($paids)): ?>
-                    <h2>有料アカウント</h2>
+                <?php if (isset($servers)): ?>
+                    <h2>削除済みサーバー</h2>
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th>accessid</th>
-                            <th>secretkey</th>
-                            <th>kind</th>
+                            <th>id</th>
+                            <th>name</th>
+                            <th>ftp user</th>
+                            <th>ftp password</th>
+                            <th>ftp path</th>
                             <th>status</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($paids as $item): ?>
+                        <?php foreach ($servers as $item): ?>
                             <tr>
-                                <td><?php echo $item['accessid']; ?></td>
-                                <td><?php echo $item['secretkey']; ?></td>
-                                <td><?php echo $item['kind']; ?></td>
+                                <td><?php echo $item['id']; ?></td>
+                                <td><?php echo $item['name']; ?></td>
+                                <td><?php echo $item['ftpuser']; ?></td>
+                                <td><?php echo $item['ftppassword']; ?></td>
+                                <td><?php echo $item['ftppath']; ?></td>
                                 <td><?php echo $item['status']; ?></td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
                     </table>
                 <?php endif; ?>
-                
-                <?php if (isset($frees)): ?>
-                    <h2>無料アカウント</h2>
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>accessid</th>
-                            <th>secretkey</th>
-                            <th>kind</th>
-                            <th>status</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($frees as $item): ?>
-                        <tr>
-                            <td><?php echo $item['accessid']; ?></td>
-                            <td><?php echo $item['secretkey']; ?></td>
-                            <td><?php echo $item['kind']; ?></td>
-                            <td><?php echo $item['status']; ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
-                
+
             </div>
         </div>
     </div>

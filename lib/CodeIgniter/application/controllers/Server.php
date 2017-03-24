@@ -60,8 +60,7 @@ class Server extends CI_Controller {
             if( $this->upload->do_upload($field_name) )
             {
                 $file_path = $this->upload->data('full_path');
-                $paid = $this->input->post('paid', TRUE);
-                $results = $this->domain->insert_accessid_from_csv($file_path, $paid);
+                $results = $this->domain->insert_server_from_csv($file_path);
                 $this->data['results'] = $results;
 
                 $this->data['msg'][] = array('kind'=>'success', 'message'=>'登録しました！');

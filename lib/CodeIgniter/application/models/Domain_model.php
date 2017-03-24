@@ -28,6 +28,50 @@ class Domain_model extends CI_Model {
 
     /**
      * @param string $filepath
+     * @return array
+     */
+    public function insert_server_from_csv($filepath="")
+    {
+        $results = array();
+        setlocale(LC_ALL, 'ja_JP');
+        $fp = fopen($filepath, "r");
+        $inserted = array();
+
+        $this->db->trans_start();
+        while(($line = fgetcsv($fp, NULL, ',', '"')) !== FALSE)
+        {
+            $name = trim($line[0]);
+            $ftpuser = trim($line[1]);
+            $ftppassword = trim($line[2]);
+            $ftppath = trim($line[3]);
+            if (isset($line[4]))
+            {
+                $status = $line[4];
+            }
+            else
+            {
+                $status = 1;
+            }
+
+            // エラー回避したのでDB登録
+            $insertdata = array(
+                'name' => $name,
+                'ftpuser' => $ftpuser,
+                'ftppassword' => $ftppassword,
+                'ftppath' => $ftppath,
+                'status' => $status,
+            );
+            $results[] = $insertdata;
+            $this->db->insert('apisv', $insertdata);
+            $inserted[] = $name;
+        }
+        $this->db->trans_complete();
+
+        return $results;
+    }
+
+    /**
+     * @param string $filepath
      * @param string $paid
      * @return array
      */

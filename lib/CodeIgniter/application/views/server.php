@@ -63,9 +63,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="row">
             <div class="col-sm-3 col-md-2 sidebar">
                 <ul class="nav nav-sidebar">
-                    <li class="active"><a href="/useddomaintools/accessid">リスト</a></li>
-                    <li><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
-                    <li><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
+                    <li class="active"><a href="/useddomaintools/server">リスト</a></li>
+                    <li><a href="/useddomaintools/server/upload">登録フォーム</a></li>
+                    <li><a href="/useddomaintools/server/deleted">削除済みリスト</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 </ul>

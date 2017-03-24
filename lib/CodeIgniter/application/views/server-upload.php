@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="ja"
 <head>
     <meta charset="UTF-8">
-    <title>アクセスID登録</title>
+    <title>サーバー登録</title>
     <base href="http://54.204.4.15/useddomaintools">
     <script src="/useddomaintools/lib/jQuery/jquery-3.1.1.min.js"></script>
     <script src="/useddomaintools/lib/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -37,14 +37,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <ul class="dropdown-menu">
                             <li><a href="/useddomaintools/accessid">リスト</a></li>
                             <li><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
-                            <li class="active"><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
+                            <li><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">サーバー <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="/useddomaintools/server">リスト</a></li>
-                            <li><a href="/useddomaintools/server/upload">登録フォーム</a></li>
+                            <li class="active"><a href="/useddomaintools/server/upload">登録フォーム</a></li>
                             <li><a href="/useddomaintools/server/deleted">削除済みリスト</a></li>
                         </ul>
                     </li>
@@ -63,68 +63,49 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="row">
             <div class="col-sm-3 col-md-2 sidebar">
                 <ul class="nav nav-sidebar">
-                    <li><a href="/useddomaintools/accessid">リスト</a></li>
-                    <li><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
-                    <li class="active"><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
+                    <li><a href="/useddomaintools/server">リスト</a></li>
+                    <li class="active"><a href="/useddomaintools/server/upload">登録フォーム</a></li>
+                    <li><a href="/useddomaintools/server/deleted">削除済みリスト</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 </ul>
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-                <h1 class="page-header">削除済みリスト</h1>
-                <?php if(isset($msg)): ?>
+                <h1 class="page-header">サーバー登録</h1>
+                <?php if (isset($msg)): ?>
                 <?php foreach($msg as $ms): ?>
                 <div class="alert alert-<?php echo $ms['kind']; ?>"><?php echo $ms['message']; ?></div>
                 <?php endforeach; ?>
                 <?php endif; ?>
-                
-                <?php if (isset($paids)): ?>
-                    <h2>有料アカウント</h2>
-                    <table class="table table-striped">
+
+                <?php if (isset($results)): ?>
+                    <h2>アップロードされたサーバーの情報</h2>
+                    <table class="table table-striped table-condensed">
                         <thead>
                         <tr>
-                            <th>accessid</th>
-                            <th>secretkey</th>
-                            <th>kind</th>
-                            <th>status</th>
+                            <th>name</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($paids as $item): ?>
-                            <tr>
-                                <td><?php echo $item['accessid']; ?></td>
-                                <td><?php echo $item['secretkey']; ?></td>
-                                <td><?php echo $item['kind']; ?></td>
-                                <td><?php echo $item['status']; ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
-                
-                <?php if (isset($frees)): ?>
-                    <h2>無料アカウント</h2>
-                    <table class="table table-striped">
-                        <thead>
+                        <?php foreach ($results as $item): ?>
                         <tr>
-                            <th>accessid</th>
-                            <th>secretkey</th>
-                            <th>kind</th>
-                            <th>status</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($frees as $item): ?>
-                        <tr>
-                            <td><?php echo $item['accessid']; ?></td>
-                            <td><?php echo $item['secretkey']; ?></td>
-                            <td><?php echo $item['kind']; ?></td>
-                            <td><?php echo $item['status']; ?></td>
+                            <td><?php echo $item['name']; ?></td>\
                         </tr>
                         <?php endforeach; ?>
                         </tbody>
                     </table>
                 <?php endif; ?>
+
+                <?php echo form_open_multipart('server/upload');?>
+                <input type="hidden" name="MAX_FILE_SIZE" value="20000000">
+                <div class="form-group">
+                    <label for="csvfile" class="control-label">CSVファイル</label>
+                    <input type="file" name="csvfile" id="csvfile">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-default">CSVファイルアップロード</button>
+                </div>
+                <?php echo form_close(); ?>
                 
             </div>
         </div>
