@@ -35,6 +35,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <ul class="nav navbar-nav navbar-left">
                     <li><a href="/useddomaintools/">トップ</a></li>
                     <li><a href="/useddomaintools/insertdomain">ドメインDB登録</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">アクセスID <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/useddomaintools/accessid">リスト</a></li>
+                            <li><a href="/useddomaintools/accessid/upload">登録フォーム</a></li>
+                            <li><a href="/useddomaintools/accessid/deleted">削除済みリスト</a></li>
+                        </ul>
+                    </li>
                     <li class="active"><a href="/useddomaintools/result">精査結果</a></li>
                     <li><a href="/useddomaintools/resetdata">データリセット</a></li>
 

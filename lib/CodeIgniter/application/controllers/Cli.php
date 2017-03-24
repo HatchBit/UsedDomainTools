@@ -297,14 +297,18 @@ class Cli extends CI_Controller {
             $svmin = 1;
         }
         echo date("Y-m-d H:i:s", time()).' SERVER NO. = '.$svmin.' - '.$svmax.PHP_EOL;
-        
+
+        // APIサーバーを取得設定
         $cloud_urlmetrics_urls = array();
-        
         for($i = $svmin; $i <= $svmax; $i++)
         {
         	$cloud_urlmetrics_urls[] = $this->domain->get_apiserver($i);
         }        
         $count_cuu = count($cloud_urlmetrics_urls);
+
+        // アクセスIDを取得設定
+        $accessides = $this->domain->get_accessid('free', 1);
+        $count_acid = count($accessides);
 
         // 処理
         // 対象ドメインを選定
@@ -346,8 +350,19 @@ class Cli extends CI_Controller {
                         $count_index = ($counter % $count_cuu) - 1;
                     }
                     $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['name'];
-                    $access_id = $cloud_urlmetrics_urls[$count_index]['access_id'];
-                    $secret_key = $cloud_urlmetrics_urls[$count_index]['secret_key'];
+                    //$access_id = $cloud_urlmetrics_urls[$count_index]['access_id'];
+                    //$secret_key = $cloud_urlmetrics_urls[$count_index]['secret_key'];
+
+                    if($counter <= $count_acid)
+                    {
+                        $accessidindex = $counter - 1;
+                    }
+                    else
+                    {
+                        $accessidindex = ($counter % $count_acid) - 1;
+                    }
+                    $access_id = $accessides[$accessidindex]['accessid'];
+                    $secret_key = $accessides[$accessidindex]['secretkey'];
 
                     echo date("Y-m-d H:i:s", time()).' CLOUD URL METRICS URL = '.$cloud_urlmetrics_url.PHP_EOL;
 
@@ -420,7 +435,14 @@ class Cli extends CI_Controller {
                     skipexecute:
 
                     // delay
-                    usleep(10000);// マイクロ秒
+                    // 2 秒待つ
+                    // usleep(2000000);
+                    // usleep(10000);// マイクロ秒
+
+                    // Free access allows you to make one request every ten seconds,
+                    // up to 25,000 rows per month.
+                    // https://moz.com/products/api/pricing
+                    sleep(10);
 
                 }
                 unset($objecturl);
@@ -494,14 +516,18 @@ class Cli extends CI_Controller {
         }
         echo date("Y-m-d H:i:s", time()).' SERVER NO. = '.$svmin.' - '.$svmax.PHP_EOL;
 
+        // APIサーバーを取得設定
         $cloud_urlmetrics_urls = array();
-
         for($i = $svmin; $i <= $svmax; $i++)
         {
             $cloud_urlmetrics_urls[] = $this->domain->get_apiserver($i);
         }
         $count_cuu = count($cloud_urlmetrics_urls);
-        
+
+        // アクセスIDを取得設定
+        $accessides = $this->domain->get_accessid('free', 1);
+        $count_acid = count($accessides);
+
         // 処理
         // 対象ドメインを選定
         $qstatus = 30000;
@@ -563,9 +589,19 @@ class Cli extends CI_Controller {
                     $count_index = ($counter % $count_cuu) - 1;
                 }
                 $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['name'];
-                $access_id = $cloud_urlmetrics_urls[$count_index]['access_id'];
-                $secret_key = $cloud_urlmetrics_urls[$count_index]['secret_key'];
+                //$access_id = $cloud_urlmetrics_urls[$count_index]['access_id'];
+                //$secret_key = $cloud_urlmetrics_urls[$count_index]['secret_key'];
 
+                if($counter <= $count_acid)
+                {
+                    $accessidindex = $counter - 1;
+                }
+                else
+                {
+                    $accessidindex = ($counter % $count_acid) - 1;
+                }
+                $access_id = $accessides[$accessidindex]['accessid'];
+                $secret_key = $accessides[$accessidindex]['secretkey'];
                 echo date("Y-m-d H:i:s", time()).' CLOUD URL METRICS URL = '.$cloud_urlmetrics_url.PHP_EOL;
 
                 $response_xml = $this->domain->get_xml_object('ol_xml', $cloud_urlmetrics_url, $objecturl, $access_id, $secret_key, 'YwwZlCRX');
@@ -636,8 +672,15 @@ class Cli extends CI_Controller {
 
                 skipexecute:
 
-                // delay 14 sec.
-                usleep(10000);// マイクロ秒
+                // delay
+                // 2 秒待つ
+                // usleep(2000000);
+                // usleep(10000);// マイクロ秒
+
+                // Free access allows you to make one request every ten seconds,
+                // up to 25,000 rows per month.
+                // https://moz.com/products/api/pricing
+                sleep(10);
 
             }
             unset($dl);

@@ -25,7 +25,50 @@ class Domain_model extends CI_Model {
         chmod($downloadfile, 0666);
         return $downloadfile;
     }
-    
+
+    /**
+     * @param string $filepath
+     * @param string $paid
+     * @return array
+     */
+    public function insert_accessid_from_csv($filepath="", $paid = "free")
+    {
+        $results = array();
+        setlocale(LC_ALL, 'ja_JP');
+        $fp = fopen($filepath, "r");
+        $inserted = array();
+        $this->db->trans_start();
+        while(($line = fgetcsv($fp, NULL, ',', '"')) !== FALSE)
+        {
+            $accessid = trim($line[0]);
+            $secretkey = trim($line[1]);
+            if (isset($line[2]))
+            {
+                $paid = $line[2];
+            }
+            elseif (empty($paid))
+            {
+                $paid = 'free';
+            }
+            if (strpos($accessid, 'mozscape') === FALSE)
+            {
+                continue;
+            }
+            // エラー回避したのでDB登録
+            $insertdata = array(
+                'accessid' => $accessid,
+                'secretkey' => $secretkey,
+                'kind' => $paid,
+                'status' => 1,
+            );
+            $results[] = $insertdata;
+            $this->db->insert('identify', $insertdata);
+            $inserted[] = $accessid;
+        }
+        $this->db->trans_complete();
+        return $results;
+    }
+
     /**
      * CSVファイルを登録
      * 
@@ -484,7 +527,103 @@ class Domain_model extends CI_Model {
         //return $result;
         return $return;
     }
-    
+
+    /**
+     * @param string $kind
+     * @param int    $status
+     * @return array
+     */
+    public function get_accessid($kind = 'free', $status = 1)
+    {
+        $results = array();
+        $this->db->from('identify');
+        $this->db->where('kind', $kind);
+        $this->db->where('status', $status);
+        $this->db->order_by('accessid', 'ASC');
+        $query = $this->db->get();
+        // 結果
+        foreach ($query->result_array() as $row)
+        {
+            $results[] = $row;
+        }
+        return $results;
+    }
+
+    /**
+     * @param null $whereparam
+     * @param null $limit
+     * @param int  $offset
+     * @return array
+     */
+    public function get_apiservers($whereparam=NULL, $limit=NULL, $offset=0)
+    {
+        $results = array();
+
+        if( $whereparam !== NULL )
+        {
+            foreach($whereparam as $val)
+            {
+                $colname = $val['colname'];
+                $colvalue = $val['value'];
+
+                switch($val['kind'])
+                {
+                    case 'or_like':
+                        $this->db->or_like($colname, $colvalue, 'both');
+                        break;
+
+                    case 'like':
+                        $this->db->like($colname, $colvalue, 'both');
+                        break;
+
+                    case 'or_where_not_in':
+                        $this->db->or_where_not_in($colname, $colvalue);
+                        break;
+
+                    case 'where_not_in':
+                        $this->db->where_not_in($colname, $colvalue);
+                        break;
+
+                    case 'or_where_in':
+                        $this->db->or_where_in($colname, $colvalue);
+                        break;
+
+                    case 'where_in':
+                        $this->db->where_in($colname, $colvalue);
+                        break;
+
+                    case 'or_where':
+                        $this->db->or_where($colname, $colvalue);
+                        break;
+
+                    case 'order_by':
+                        $this->db->order_by($colname, $colvalue);
+                        break;
+
+                    case 'where':
+                    default:
+                        $this->db->where($colname, $colvalue);
+                        break;
+                }
+            }
+            unset($val);
+        }
+
+        if( ! empty($limit))
+        {
+            $this->db->limit($limit, $offset);
+        }
+
+        $this->db->from('apisv');
+
+        $query = $this->db->get();
+        foreach ($query->result_array() as $row)
+        {
+            $results[] = $row;
+        }
+        return $results;
+    }
+
     public function get_apiserver($svnum=NULL)
     {
         $result = array();
@@ -502,6 +641,10 @@ class Domain_model extends CI_Model {
             $result['name'] = $row['name'];
             $result['access_id'] = $row['access_id'];
             $result['secret_key'] = $row['secret_key'];
+            $result['ftpuser'] = $row['ftpuser'];
+            $result['ftppassword'] = $row['ftppassword'];
+            $result['ftppath'] = $row['ftppath'];
+            $result['status'] = $row['status'];
         }
         return $result;
     }

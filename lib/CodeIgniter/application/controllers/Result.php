@@ -479,6 +479,8 @@ class Result extends CI_Controller {
         
         $whereparam = array();
         $whereparam[] = array('kind'=>'where', 'colname'=>'mozcheck', 'value'=> 1);
+        $whereparam[] = array('kind'=>'or_where', 'colname'=>'status', 'value'=> -3);
+        $whereparam[] = array('kind'=>'or_where', 'colname'=>'status', 'value'=> -4);
         $this->data['countSiteMetChecked'] = $this->domain->get_count_domains($whereparam, 'domains');
 
         $whereparam = array();
