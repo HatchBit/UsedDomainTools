@@ -390,6 +390,16 @@ class Cli extends CI_Controller {
 
                     echo date("Y-m-d H:i:s", time()).' CLOUD URL METRICS URL = '.$cloud_urlmetrics_url.PHP_EOL;
 
+                    // delay
+                    // 2 秒待つ
+                    // usleep(2000000);
+                    // usleep(10000);// マイクロ秒
+
+                    // Free access allows you to make one request every ten seconds,
+                    // up to 25,000 rows per month.
+                    // https://moz.com/products/api/pricing
+                    sleep(1);
+
                     $response_xml = $this->domain->get_xml_object('xml', $cloud_urlmetrics_url, $objecturl, $access_id, $secret_key, 'YwwZlCRX');
 
                     echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true).PHP_EOL;
@@ -458,15 +468,7 @@ class Cli extends CI_Controller {
 
                     skipexecute:
 
-                    // delay
-                    // 2 秒待つ
-                    // usleep(2000000);
-                    // usleep(10000);// マイクロ秒
 
-                    // Free access allows you to make one request every ten seconds,
-                    // up to 25,000 rows per month.
-                    // https://moz.com/products/api/pricing
-                    sleep(1);
 
                 }
                 unset($objecturl);
@@ -653,6 +655,16 @@ class Cli extends CI_Controller {
                 $secret_key = $accessides[$accessidindex]['secretkey'];
                 echo date("Y-m-d H:i:s", time()).' CLOUD URL METRICS URL = '.$cloud_urlmetrics_url.PHP_EOL;
 
+                // delay
+                // 2 秒待つ
+                // usleep(2000000);
+                // usleep(10000);// マイクロ秒
+
+                // Free access allows you to make one request every ten seconds,
+                // up to 25,000 rows per month.
+                // https://moz.com/products/api/pricing
+                sleep(1);
+
                 $response_xml = $this->domain->get_xml_object('ol_xml', $cloud_urlmetrics_url, $objecturl, $access_id, $secret_key, 'YwwZlCRX');
 
                 echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true);
@@ -721,15 +733,7 @@ class Cli extends CI_Controller {
 
                 skipexecute:
 
-                // delay
-                // 2 秒待つ
-                // usleep(2000000);
-                // usleep(10000);// マイクロ秒
 
-                // Free access allows you to make one request every ten seconds,
-                // up to 25,000 rows per month.
-                // https://moz.com/products/api/pricing
-                sleep(1);
 
             }
             unset($dl);
