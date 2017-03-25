@@ -352,7 +352,28 @@ class Cli extends CI_Controller {
                     {
                         $count_index = ($counter % $count_cuu) - 1;
                     }
-                    $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['name'];
+
+                    if ( ! empty($cloud_urlmetrics_urls[$count_index]['private_hostname']))
+                    {
+                        $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['private_hostname'];
+                    }
+                    elseif ( ! empty($cloud_urlmetrics_urls[$count_index]['private_ipv4']))
+                    {
+                        $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['private_ipv4'];
+                    }
+                    elseif ( ! empty($cloud_urlmetrics_urls[$count_index]['public_hostname']))
+                    {
+                        $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['public_hostname'];
+                    }
+                    elseif ( ! empty($cloud_urlmetrics_urls[$count_index]['public_ipv4']))
+                    {
+                        $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['public_ipv4'];
+                    }
+                    else
+                    {
+                        $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['name'];
+                    }
+
                     //$access_id = $cloud_urlmetrics_urls[$count_index]['access_id'];
                     //$secret_key = $cloud_urlmetrics_urls[$count_index]['secret_key'];
 
@@ -595,7 +616,28 @@ class Cli extends CI_Controller {
                 {
                     $count_index = ($counter % $count_cuu) - 1;
                 }
-                $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['name'];
+
+                if ( ! empty($cloud_urlmetrics_urls[$count_index]['private_hostname']))
+                {
+                    $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['private_hostname'];
+                }
+                elseif ( ! empty($cloud_urlmetrics_urls[$count_index]['private_ipv4']))
+                {
+                    $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['private_ipv4'];
+                }
+                elseif ( ! empty($cloud_urlmetrics_urls[$count_index]['public_hostname']))
+                {
+                    $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['public_hostname'];
+                }
+                elseif ( ! empty($cloud_urlmetrics_urls[$count_index]['public_ipv4']))
+                {
+                    $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['public_ipv4'];
+                }
+                else
+                {
+                    $cloud_urlmetrics_url = $cloud_urlmetrics_urls[$count_index]['name'];
+                }
+
                 //$access_id = $cloud_urlmetrics_urls[$count_index]['access_id'];
                 //$secret_key = $cloud_urlmetrics_urls[$count_index]['secret_key'];
 

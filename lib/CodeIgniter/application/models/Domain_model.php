@@ -44,6 +44,7 @@ class Domain_model extends CI_Model {
             $ftpuser = trim($line[1]);
             $ftppassword = trim($line[2]);
             $ftppath = trim($line[3]);
+
             if (isset($line[4]))
             {
                 $status = $line[4];
@@ -53,9 +54,50 @@ class Domain_model extends CI_Model {
                 $status = 1;
             }
 
+            if (isset($line[5]))
+            {
+                $public_hostname = trim($line[5]);
+            }
+            else
+            {
+                $public_hostname = $name;
+            }
+
+            if (isset($line[6]))
+            {
+                $public_ipv4 = trim($line[6]);
+            }
+            else
+            {
+                $public_ipv4 = $public_hostname;
+            }
+
+            if (isset($line[7]))
+            {
+                $private_hostname = trim($line[7]);
+            }
+            else
+            {
+                $private_hostname = $public_hostname;
+            }
+
+            if (isset($line[8]))
+            {
+                $private_ipv4 = trim($line[8]);
+            }
+            else
+            {
+                $private_ipv4 = $private_hostname;
+            }
+
+
             // エラー回避したのでDB登録
             $insertdata = array(
                 'name' => $name,
+                'public_hostname' => $public_hostname,
+                'public_ipv4' => $public_ipv4,
+                'private_hostname' => $private_hostname,
+                'private_ipv4' => $private_ipv4,
                 'ftpuser' => $ftpuser,
                 'ftppassword' => $ftppassword,
                 'ftppath' => $ftppath,
@@ -833,14 +875,7 @@ class Domain_model extends CI_Model {
         $row = $query->row_array();
         if (isset($row))
         {
-            $result['id'] = $row['id'];
-            $result['name'] = $row['name'];
-            $result['access_id'] = $row['access_id'];
-            $result['secret_key'] = $row['secret_key'];
-            $result['ftpuser'] = $row['ftpuser'];
-            $result['ftppassword'] = $row['ftppassword'];
-            $result['ftppath'] = $row['ftppath'];
-            $result['status'] = $row['status'];
+            $result = $row;
         }
         return $result;
     }

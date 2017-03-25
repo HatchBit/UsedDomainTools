@@ -84,12 +84,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <thead>
                         <tr>
                             <th>name</th>
+                            <th>public_hostname</th>
+                            <th>public_ipv4</th>
+                            <th>private_hostname</th>
+                            <th>private_ipv4</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($results as $item): ?>
                         <tr>
-                            <td><?php echo $item['name']; ?></td>\
+                            <td><?php echo $item['name']; ?></td>
+                            <td><?php echo $item['public_hostname']; ?></td>
+                            <td><?php echo $item['public_ipv4']; ?></td>
+                            <td><?php echo $item['private_hostname']; ?></td>
+                            <td><?php echo $item['private_ipv4']; ?></td>
                         </tr>
                         <?php endforeach; ?>
                         </tbody>
