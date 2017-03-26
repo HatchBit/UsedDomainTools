@@ -142,6 +142,16 @@ class Cli extends CI_Controller {
     public function insertfromfiles()
     {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
+
+        // Lock ファイルチェック
+        $lockfilename = $this->downloaddir . DIRECTORY_SEPARATOR . 'insertfromfiles.lock';
+        if ($this->_lockfile_check($lockfilename) === FALSE )
+        {
+            echo date("Y-m-d H:i:s", time()).' ERROR. 別プロセスが実行中...'.PHP_EOL;
+            echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL.PHP_EOL;
+            exit();
+        }
+
         $filemap = directory_map($this->downloaddir, 1);
         //var_dump($filemap);
         
@@ -155,7 +165,12 @@ class Cli extends CI_Controller {
                 break;
             }
         }
-        echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
+
+        // Lock ファイル削除
+        $this->_lockfile_delete($lockfilename);
+
+        echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL.PHP_EOL;
+        exit();
     }
     
 /**
@@ -169,7 +184,16 @@ class Cli extends CI_Controller {
     public function getstatus($num=500)
     {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
-        
+
+        // Lock ファイルチェック
+        $lockfilename = $this->downloaddir . DIRECTORY_SEPARATOR . 'getstatus.lock';
+        if ($this->_lockfile_check($lockfilename) === FALSE )
+        {
+            echo date("Y-m-d H:i:s", time()).' ERROR. 別プロセスが実行中...'.PHP_EOL;
+            echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL.PHP_EOL;
+            exit();
+        }
+
         $domainlist = $this->domain->get_domains(NULL, 0, $num, 0);
         
         if( $domainlist )
@@ -233,7 +257,12 @@ class Cli extends CI_Controller {
             }
 
         }
-        echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
+
+        // Lock ファイル削除
+        $this->_lockfile_delete($lockfilename);
+
+        echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL.PHP_EOL;
+        exit();
     }
     
 /**
@@ -251,7 +280,16 @@ class Cli extends CI_Controller {
     public function getxml($sv_min=1, $sv_max=100, $num=1000, $debug=FALSE)
     {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
-        
+
+        // Lock ファイルチェック
+        $lockfilename = $this->downloaddir . DIRECTORY_SEPARATOR . 'getxml.lock';
+        if ($this->_lockfile_check($lockfilename) === FALSE )
+        {
+            echo date("Y-m-d H:i:s", time()).' ERROR. 別プロセスが実行中...'.PHP_EOL;
+            echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL.PHP_EOL;
+            exit();
+        }
+
         // SEOMOZ
         //$apiurl = 'http://lsapi.seomoz.com/linkscape/url-metrics/##DOMAIN##?Cols=103079217184&AccessID=##ACCESSID##&Expires=##EXPIRES##&Signature=##SIGNATURE##';
         
@@ -479,7 +517,10 @@ class Cli extends CI_Controller {
         {
             echo date("Y-m-d H:i:s", time()).' ドメインなしの為、処理途中終了'.PHP_EOL;
         }
-        
+
+        // Lock ファイル削除
+        $this->_lockfile_delete($lockfilename);
+
         echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
     }
     
@@ -496,7 +537,16 @@ class Cli extends CI_Controller {
     public function getolxml($sv_min=101, $sv_max=200, $num=500, $debug=FALSE)
     {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
-        
+
+        // Lock ファイルチェック
+        $lockfilename = $this->downloaddir . DIRECTORY_SEPARATOR . 'getolxml.lock';
+        if ($this->_lockfile_check($lockfilename) === FALSE )
+        {
+            echo date("Y-m-d H:i:s", time()).' ERROR. 別プロセスが実行中...'.PHP_EOL;
+            echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL.PHP_EOL;
+            exit();
+        }
+
         // SEOMOZ
         //$apiurl = 'http://lsapi.seomoz.com/linkscape/url-metrics/##DOMAIN##?Cols=103079231493&AccessID=##ACCESSID##&Expires=##EXPIRES##&Signature=##SIGNATURE##';
         
@@ -579,6 +629,10 @@ class Cli extends CI_Controller {
         if(count($domain_ids) === 0)
         {
             echo date("Y-m-d H:i:s", time()).' ドメインなしの為、処理途中終了'.PHP_EOL;
+
+            // Lock ファイル削除
+            $this->_lockfile_delete($lockfilename);
+
             echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
             exit();
         }
@@ -742,6 +796,38 @@ class Cli extends CI_Controller {
         {
             echo date("Y-m-d H:i:s", time()).' ドメインなしの為、処理途中終了'.PHP_EOL;
         }
+
+        // Lock ファイル削除
+        $this->_lockfile_delete($lockfilename);
+
         echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
+    }
+
+    private function _lockfile_check($filename = NULL)
+    {
+        if (file_exists($filename))
+        {
+            return FALSE;
+        }
+        else
+        {
+            $content = date("Y-m-d H:i:s");
+            file_put_contents($filename, $content, FILE_APPEND | LOCK_EX);
+            return TRUE;
+        }
+    }
+
+    private function _lockfile_delete($filename = NULL)
+    {
+        // Lock ファイル削除
+        if (file_exists($filename))
+        {
+            unlink($filename);
+            return TRUE;
+        }
+        else
+        {
+            return FALSE;
+        }
     }
 }

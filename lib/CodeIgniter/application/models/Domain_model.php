@@ -661,7 +661,11 @@ class Domain_model extends CI_Model {
         }
         $this->db->update($tablename, $updatedata);
     }
-    
+
+    /**
+     * @param null $url
+     * @return bool|string
+     */
     public function get_http_statuscode($url=NULL)
     {
         if($url == NULL)
