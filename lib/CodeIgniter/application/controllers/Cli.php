@@ -427,6 +427,7 @@ class Cli extends CI_Controller {
                     $secret_key = $accessides[$accessidindex]['secretkey'];
 
                     echo date("Y-m-d H:i:s", time()).' CLOUD URL METRICS URL = '.$cloud_urlmetrics_url.PHP_EOL;
+                    echo date("Y-m-d H:i:s", time()).' ACCESS ID = '.$access_id.' / SECRET KEY = '.$secret_key.PHP_EOL;
 
                     // delay
                     // 2 秒待つ
@@ -436,11 +437,18 @@ class Cli extends CI_Controller {
                     // Free access allows you to make one request every ten seconds,
                     // up to 25,000 rows per month.
                     // https://moz.com/products/api/pricing
-                    sleep(1);
+                    // sleep(1);
 
                     $response_xml = $this->domain->get_xml_object('xml', $cloud_urlmetrics_url, $objecturl, $access_id, $secret_key, 'YwwZlCRX');
 
-                    echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true).PHP_EOL;
+                    if ($response_xml === FALSE)
+                    {
+                        echo date("Y-m-d H:i:s", time()).' RESPONSE XML = FALSE'.PHP_EOL;
+                    }
+                    else
+                    {
+                        echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true);
+                    }
 
                     if(strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR strpos($response_xml, 'ERROR:') !== FALSE OR empty($response_xml))
                     {
@@ -708,6 +716,7 @@ class Cli extends CI_Controller {
                 $access_id = $accessides[$accessidindex]['accessid'];
                 $secret_key = $accessides[$accessidindex]['secretkey'];
                 echo date("Y-m-d H:i:s", time()).' CLOUD URL METRICS URL = '.$cloud_urlmetrics_url.PHP_EOL;
+                echo date("Y-m-d H:i:s", time()).' ACCESS ID = '.$access_id.' / SECRET KEY = '.$secret_key.PHP_EOL;
 
                 // delay
                 // 2 秒待つ
@@ -717,28 +726,36 @@ class Cli extends CI_Controller {
                 // Free access allows you to make one request every ten seconds,
                 // up to 25,000 rows per month.
                 // https://moz.com/products/api/pricing
-                sleep(1);
+                // sleep(1);
 
                 $response_xml = $this->domain->get_xml_object('ol_xml', $cloud_urlmetrics_url, $objecturl, $access_id, $secret_key, 'YwwZlCRX');
 
-                echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true);
+                if ($response_xml === FALSE)
+                {
+                    echo date("Y-m-d H:i:s", time()).' RESPONSE XML = FALSE'.PHP_EOL;
+                    continue;
+                }
+                else
+                {
+                    echo date("Y-m-d H:i:s", time()).' RESPONSE XML = '.print_r($response_xml, true);
+                }
 
-                if(strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR strpos($response_xml, 'ERROR:') !== FALSE OR empty($response_xml))
+                if ( strpos($response_xml, 'center>') !== FALSE OR strpos($response_xml, 'DOCTYPE') !== FALSE OR strpos($response_xml, 'ERROR:') !== FALSE OR empty($response_xml))
                 {
                     echo date("Y-m-d H:i:s", time()).' RESPONSE ERROR!'.PHP_EOL;
-                    goto skipexecute1;
+                    continue;
                 }
 
                 // XML を配列に変換
                 $response = xml2array(simplexml_load_string($response_xml));
 
-                if($debug !== FALSE)
+                if ($debug !== FALSE)
                 {
                     echo date("Y-m-d H:i:s", time()).' response = '.print_r($response, true).PHP_EOL;
-                    goto skipexecute;
+                    continue;
                 }
 
-                if( ! empty($response) && ! isset($response['error_message']) )
+                if ( ! empty($response) && ! isset($response['error_message']) )
                 {
                     foreach($response as $val)
                     {
@@ -783,12 +800,6 @@ class Cli extends CI_Controller {
                     $this->domain->update_domains($whereparam, $updatedata, "domainCheckSites");
                 }
 
-                skipexecute1:
-
-                skipexecute:
-
-
-
             }
             unset($dl);
         }
@@ -803,20 +814,48 @@ class Cli extends CI_Controller {
         echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
     }
 
+    /**
+     * ロックファイルチェック
+     *
+     * ロックファイルがあるかチェックし、なければ作成します。
+     *
+     * @param null $filename
+     * @return bool
+     */
     private function _lockfile_check($filename = NULL)
     {
         if (file_exists($filename))
         {
-            return FALSE;
+            $filemtime = filemtime($filename);
+            $deletetime = mktime(date('H') - 9, date('i') - 30, date('s'), date('n'), date('j'), date('Y'));
+
+            if ($filemtime < $deletetime)
+            {
+                return $this->_lockfile_delete($filename);
+            }
+            else
+            {
+                return FALSE;
+            }
+
         }
         else
         {
             $content = date("Y-m-d H:i:s");
             file_put_contents($filename, $content, FILE_APPEND | LOCK_EX);
+            //touch($filename)
             return TRUE;
         }
     }
 
+    /**
+     * ロックファイル削除
+     *
+     * ロックファイルを削除して、ロック解除します。
+     *
+     * @param null $filename
+     * @return bool
+     */
     private function _lockfile_delete($filename = NULL)
     {
         // Lock ファイル削除

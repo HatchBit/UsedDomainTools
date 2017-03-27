@@ -911,7 +911,16 @@ class Domain_model extends CI_Model {
         $results = json_decode($response, TRUE);
         return $results;
     }
-    
+
+    /**
+     * @param null $kind
+     * @param null $server
+     * @param null $url
+     * @param null $accessid
+     * @param null $secretkey
+     * @param null $password
+     * @return bool|mixed
+     */
     public function get_xml_object($kind=NULL, $server=NULL, $url=NULL, $accessid=NULL, $secretkey=NULL, $password=NULL)
     {
         // http://66.221.175.168/ol/get_xml.php?url=www.hatchbit.jp&password=YwwZlCRX
@@ -953,7 +962,7 @@ class Domain_model extends CI_Model {
 
         echo date("Y-m-d H:i:s", time()).' REQUEST URL = '.$requesturi.PHP_EOL;
 
-        $agent = "Domain Tools 0.1";
+        $agent = "Used Domain Tools 0.1";
         // cURL options
         $options = array(
             CURLOPT_URL            => $requesturi,// 取得する URL 。 curl_init() でセッションを 初期化する際に指定することも可能です。
@@ -961,7 +970,7 @@ class Domain_model extends CI_Model {
             CURLOPT_NOBODY         => FALSE,// TRUE を設定すると、出力から本文を削除します。 リクエストメソッドは HEAD となります。これを FALSE に変更してもリクエストメソッドは GET には変わりません。
             CURLOPT_RETURNTRANSFER => TRUE,// TRUE を設定すると、 curl_exec() の返り値を 文字列で返します。通常はデータを直接出力します。
             CURLOPT_FRESH_CONNECT  => TRUE,// TRUE を設定すると、キャッシュされている接続を利用せずに 新しい接続を確立します。
-            CURLOPT_USERAGENT      => $agent,// HTTP リクエストで使用される "User-Agent: " ヘッダの内容。
+            //CURLOPT_USERAGENT      => $agent,// HTTP リクエストで使用される "User-Agent: " ヘッダの内容。
             //CURLOPT_COOKIEFILE     => $cookiefile
             CURLOPT_CONNECTTIMEOUT => 2,// 接続の試行を待ち続ける秒数。0 は永遠に待ち続けることを意味します。
         );
@@ -972,6 +981,12 @@ class Domain_model extends CI_Model {
         
         // execute.
         $response = curl_exec($ch);
+
+        if ($response === FALSE)
+        {
+            $response = 'CURL ERROR: '.curl_error($ch);
+        }
+
         // close.
         curl_close($ch);
         
