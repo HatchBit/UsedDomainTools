@@ -8,118 +8,75 @@
  * @license     This software is released under the MIT License.
  *              http://opensource.org/licenses/mit-license.php
  * @link        http://www.hatchbit.jp
- * @since       Version 1.0
+ * @since       Version 2.0
  * @filesource
  */
 
-/*====================
-  DEFINE
-  ====================*/
+require_once './config.php';
+$password = strval($_GET['password']);
+if( $password != Password ){
+    header("HTTP/1.0 400 Bad Request");
+    echo "<h1>400 Bad Request</h1>";
+    exit();
+}
 
-ini_set( "display_errors", "Off");
-
-require_once('./config.php');
-
-/*====================
-  BEFORE ACTIONS
-  ====================*/
-
-set_include_path(ROOT_DIR . PATH_SEPARATOR . get_include_path());
-
-require_once ROOT_DIR.'authentication/authenticator.php';
-
-require_once ROOT_DIR.'constants/anchor_text_constants.php';
-require_once ROOT_DIR.'constants/links_constants.php';
-require_once ROOT_DIR.'constants/metadata_constants.php';
-require_once ROOT_DIR.'constants/top_pages_constants.php';
-require_once ROOT_DIR.'constants/url_metrics_constants.php';
-
-require_once ROOT_DIR.'services/abstract_service.php';
-require_once ROOT_DIR.'services/anchor_text_service.php';
-require_once ROOT_DIR.'services/links_service.php';
-require_once ROOT_DIR.'services/metadata_service.php';
-require_once ROOT_DIR.'services/top_pages_service.php';
-require_once ROOT_DIR.'services/url_metrics_service.php';
-
-require_once ROOT_DIR.'utilities/connection_utility.php';
-require_once ROOT_DIR.'utilities/database_utility.php';
-
-//Add your accessID here kunugi Account
-$AccessID = AccessID;
-//Add your secretKey here
-$SecretKey = SecretKey;
+// Get your access id and secret key here: https://moz.com/products/api/keys
+$accessID = "mozscape-220b92a7b6";
+$secretKey = "46d7fb637e136ce02287928947b98d9c";
 
 if(isset($_GET['accessid']) && !empty($_GET['accessid'])){
-    $AccessID = strval($_GET['accessid']);
+    $accessID = strval($_GET['accessid']);
 }
 
 if(isset($_GET['secretkey']) && !empty($_GET['secretkey'])){
-    $SecretKey = strval($_GET['secretkey']);
+    $secretKey = strval($_GET['secretkey']);
 }
 
-$password ="";
-$password = strval($_GET['password']);
+// Set your expires times for several minutes into the future.
+// An expires time excessively far in the future will not be honored by the Mozscape API.
+$expires = time() + 300;
 
-$url ="";
-$url = htmlspecialchars($_GET['url']);
+// Put each parameter on a new line.
+$stringToSign = $accessID."\n".$expires;
 
-if(!$url || $password != Password ){
-    header("HTTP/1.0 400 Bad Request");
-    echo "<h1>400 Bad Request</h1>";
-    exit;
-}
+// Get the "raw" or binary output of the hmac hash.
+$binarySignature = hash_hmac('sha1', $stringToSign, $secretKey, true);
 
-/*====================
-  MAIN ACTIONS
-  ====================*/
+// Base64-encode it and then url-encode that.
+$urlSafeSignature = urlencode(base64_encode($binarySignature));
 
-$authenticator = new Authenticator();
-$authenticator->setAccessID(AccessID);
-$authenticator->setSecretKey(SecretKey);
-$authenticator->setExpiresInterval(300);
+// Specify the URL that you want link metrics for.
+$objectURL = "moz.com";
+$objectURL = htmlspecialchars($_GET['url']);
 
-$xscope = "page_to_page";
-$xfilter = "external+follow";
-$xsort = "page_authority";
-$xcol = 103079215108; //30;
-$xtargetcol = 0;
-$xlinkcol = 1;
+// Add up all the bit flags you want returned.
+// Learn more here: https://moz.com/help/guides/moz-api/mozscape/api-reference/url-metrics
+$cols = "103079215108";
 
+// Put it all together and you get your request URL.
+// This example uses the Mozscape URL Metrics API.
+//$requestUrl = "http://lsapi.seomoz.com/linkscape/url-metrics/".urlencode($objectURL)."?Cols=".$cols."&AccessID=".$accessID."&Expires=".$expires."&Signature=".$urlSafeSignature;
+$requestUrl = "http://lsapi.seomoz.com/linkscape/links/".urlencode($objectURL)."?Scope=page_to_page&Sort=page_authority&Filter=external&Limit=100&SourceCols=".$cols."&TargetCols=4&AccessID=".$accessID."&Expires=".$expires."&Signature=".$urlSafeSignature;
+//$requestUrl = "http://lsapi.seomoz.com/linkscape/links/moz.com?Scope=pagetopage&Sort=page_authority&Filter=internal+301&Limit=1&SourceCols=536870916&TargetCols= 4&AccessID=".$accessID."&Expires=".$expires."&Signature=".$urlSafeSignature;
+//echo $requestUrl.PHP_EOL;
+
+// Use Curl to send off your request.
 $options = array(
-	"scope"=>$xscope
-	,"filters"=>$xfilter
-	,"sort"=>$xsort
-	,"source_cols"=>$xcol
-	,"target_cols"=>$xtargetcol
-	,"link_cols"=>$xlinkcol
-	,"offset"=>0
-	,"limit"=>100
+    CURLOPT_RETURNTRANSFER => true
+    ,CURLOPT_HEADER => false
 );
 
-$linksService = new LinksService($authenticator);
-$response = $linksService->getLinks($url, $options);
+$ch = curl_init($requestUrl);
+curl_setopt_array($ch, $options);
+$content = curl_exec($ch);
+curl_close($ch);
 
-//print_r($response);
+//var_dump($content);
+//exit();
 
-$row = 0;
-$tableData = array();
-
-if(!empty($response)){
-	foreach($response as $val){
-		$ins = (array)$val;
-		$tableData[$row]["uu"] = $ins["uu"];//pageURL
-		$tableData[$row]["luuu"] = $url;//リンク元URL
-		$tableData[$row]["ltgt"] = $ins["ltgt"];
-		$tableData[$row]["lsrc"] = $ins["lsrc"];
-		$tableData[$row]["lrid"] = $ins["lrid"];
-		$tableData[$row]["pda"] = $ins["pda"];//Domain Authority
-		$tableData[$row]["upa"] = $ins["upa"];//Page Authority
-		$row++;
-	}
-
-	//print_r($tableData);
-
-}
+$tableData = json_decode($content);
+//var_dump($tableData);
+//exit();
 
 if(isset($tableData)){
 	$results = xml_Document($tableData);
