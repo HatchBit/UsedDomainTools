@@ -282,6 +282,7 @@ class Cli extends CI_Controller {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
 
         // Lock ファイルチェック
+        /*
         $lockfilename = $this->downloaddir . DIRECTORY_SEPARATOR . 'getxml.lock';
         if ($this->_lockfile_check($lockfilename) === FALSE )
         {
@@ -289,7 +290,7 @@ class Cli extends CI_Controller {
             echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL.PHP_EOL;
             exit();
         }
-
+        */
         // SEOMOZ
         //$apiurl = 'http://lsapi.seomoz.com/linkscape/url-metrics/##DOMAIN##?Cols=103079217184&AccessID=##ACCESSID##&Expires=##EXPIRES##&Signature=##SIGNATURE##';
         
@@ -527,8 +528,9 @@ class Cli extends CI_Controller {
         }
 
         // Lock ファイル削除
+        /*
         $this->_lockfile_delete($lockfilename);
-
+        */
         echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
     }
     
@@ -547,6 +549,7 @@ class Cli extends CI_Controller {
         echo date("Y-m-d H:i:s", time()).' START.'.PHP_EOL;
 
         // Lock ファイルチェック
+        /*
         $lockfilename = $this->downloaddir . DIRECTORY_SEPARATOR . 'getolxml.lock';
         if ($this->_lockfile_check($lockfilename) === FALSE )
         {
@@ -554,6 +557,7 @@ class Cli extends CI_Controller {
             echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL.PHP_EOL;
             exit();
         }
+        */
 
         // SEOMOZ
         //$apiurl = 'http://lsapi.seomoz.com/linkscape/url-metrics/##DOMAIN##?Cols=103079231493&AccessID=##ACCESSID##&Expires=##EXPIRES##&Signature=##SIGNATURE##';
@@ -809,7 +813,9 @@ class Cli extends CI_Controller {
         }
 
         // Lock ファイル削除
+        /*
         $this->_lockfile_delete($lockfilename);
+        */
 
         echo date("Y-m-d H:i:s", time()).' END.'.PHP_EOL;
     }
